@@ -1,0 +1,147 @@
+[
+    {
+        "name": "Trans-Neptune Probe",
+        "kind": "Automatic",
+        "tags": [
+            "Science",
+            "Space"
+        ],
+        "cost": {
+            "Space": 6
+        },
+        "points": {
+            "Immediate": 1
+        }
+    }, {
+        "name": "Space Elevator",
+        "kind": "Active",
+        "tags": [
+            "Space",
+            "Building"
+        ],
+        "cost": {
+            "SpaceOrBuilding": 27
+        },
+        "points": {
+            "Immediate": 2
+        },
+        "own_production": {
+            "Titanium": 1
+        },
+        "actions": [
+            {
+                "ResourceConversion": {
+                    "cost": {
+                        "Steel": 1
+                    },
+                    "production": {
+                        "Megacredits": 5
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "name": "Technology Demonstration",
+        "kind": "Event",
+        "tags": [
+            "Science",
+            "Space"
+        ],
+        "cost": {
+            "Space": 5
+        },
+        "impacts": [
+            {
+                "DrawCard": 2
+            }
+        ]
+    },
+    {
+        "name": "Lagrange Observatory",
+        "kind": "Automatic",
+        "tags": [
+            "Science",
+            "Space"
+        ],
+        "cost": {
+            "Space": 9
+        },
+        "points": {
+            "Immediate": 1
+        },
+        "impacts": [
+            {
+                "DrawCard": 1
+            }
+        ]
+    },
+    {
+        "name": "Mine",
+        "kind": "Automatic",
+        "tags": [
+            "Building"
+        ],
+        "cost": {
+            "Building": 4
+        },
+        "own_production": {
+            "Steel": 1
+        }
+    },
+    {
+        "name": "Sponsors",
+        "kind": "Automatic",
+        "tags": [
+            "Earth"
+        ],
+        "cost": {
+            "Megacredits": 6
+        },
+        "own_production": {
+            "Megacredits": 2
+        }
+    },
+    {
+        "name": "Corporate Stronghold",
+        "kind": "Automatic",
+        "tags": [
+            "City",
+            "Building"
+        ],
+        "cost": {
+            "Building": 11
+        },
+        "points": {
+            "Immediate": -2
+        },
+        "own_production": {
+            "Energy": -1,
+            "Megacredits": 3
+        },
+        "immediate_impacts": [
+            {"PlaceCity": "RegularCity"}
+        ]
+    },
+    {
+        "name": "Power Supply Consortium",
+        "kind": "Automatic",
+        "tags": [
+            "Power"
+        ],
+        "cost": {
+            "Megacredits": 5
+        },
+        "requirements": [
+            {
+                "MinTags": ["Power", 2]
+            }
+        ],
+        "own_production": {
+            "Energy": 1
+        },
+        "any_production": {
+            "Energy": -1
+        }
+    }
+]

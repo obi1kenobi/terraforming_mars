@@ -1,0 +1,554 @@
+[
+    {
+        "name": "Windmills",
+        "kind": "Automatic",
+        "tags": [
+            "Power",
+            "Building"
+        ],
+        "cost": {
+            "Building": 6
+        },
+        "requirements": [
+            {
+                "MinOxygen": 7
+            }
+        ],
+        "points": {
+            "Immediate": 1
+        },
+        "own_production": {
+            "Titanium": 1
+        }
+    },
+    {
+        "name": "Advanced Ecosystems",
+        "kind": "Automatic",
+        "tags": [
+            "Plant",
+            "Microbe",
+            "Animal"
+        ],
+        "cost": {
+            "Megacredits": 11
+        },
+        "requirements": [
+            {
+                "MinTags": [
+                    "Plant",
+                    1
+                ]
+            },
+            {
+                "MinTags": [
+                    "Microbe",
+                    1
+                ]
+            },
+            {
+                "MinTags": [
+                    "Animal",
+                    1
+                ]
+            }
+        ],
+        "points": {
+            "Immediate": 3
+        }
+    },
+    {
+        "name": "Convoy From Europa",
+        "kind": "Event",
+        "tags": [
+            "Space"
+        ],
+        "cost": {
+            "Space": 15
+        },
+        "immediate_impacts": [
+            {
+                "PlaceOcean": "ReservedForOcean"
+            },
+            {
+                "DrawCard": 1
+            }
+        ]
+    },
+    {
+        "name": "Martian Rails",
+        "kind": "Active",
+        "tags": [
+            "Building"
+        ],
+        "cost": {
+            "Building": 13
+        },
+        "actions": [
+            {
+                "GainResourcesPerCityOnMars": {
+                    "cost": {
+                        "Energy": 1
+                    },
+                    "production_per_city": {
+                        "Megacredits": 1
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "name": "Search For Life",
+        "kind": "Active",
+        "tags": [
+            "Science"
+        ],
+        "cost": {
+            "Megacredits": 3
+        },
+        "requirements": [
+            {
+                "MaxOxygen": 6
+            }
+        ],
+        "points": {
+            "FixedPointsIfAnyCardResourcePresent": [
+                3,
+                "Science"
+            ]
+        },
+        "actions": [
+            {
+                "RevealAndDiscardCardToGainCardResource": {
+                    "cost": {
+                        "Megacredits": 1
+                    },
+                    "sought_tags": [
+                        "Microbe"
+                    ],
+                    "gained_resources": {
+                        "Science": 1
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "name": "Small Animals",
+        "kind": "Active",
+        "tags": [
+            "Animal"
+        ],
+        "cost": {
+            "Megacredits": 6
+        },
+        "requirements": [
+            {
+                "MinOxygen": 6
+            }
+        ],
+        "points": {
+            "PerCardResource": [
+                1,
+                2,
+                "Animal"
+            ]
+        },
+        "any_production": {
+            "Plants": -1
+        },
+        "actions": [
+            {
+                "AddResourceToSameCard": {
+                    "card_resource": "Animal",
+                    "count": 1
+                }
+            }
+        ]
+    },
+    {
+        "name": "Bushes",
+        "kind": "Automatic",
+        "tags": [
+            "Plant"
+        ],
+        "cost": {
+            "Megacredits": 10
+        },
+        "requirements": [
+            {
+                "MinTemperature": -10
+            }
+        ],
+        "own_production": {
+            "Plants": 2
+        },
+        "immediate_impacts": [
+            {
+                "GainResource": [
+                    "Plants",
+                    2
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Power Plant",
+        "kind": "Automatic",
+        "tags": [
+            "Power",
+            "Building"
+        ],
+        "cost": {
+            "Building": 4
+        },
+        "own_production": {
+            "Energy": 1
+        }
+    },
+    {
+        "name": "Noctis Farming",
+        "kind": "Automatic",
+        "tags": [
+            "Plant",
+            "Building"
+        ],
+        "cost": {
+            "Building": 10
+        },
+        "requirements": [
+            {
+                "MinTemperature": -20
+            }
+        ],
+        "points": {
+            "Immediate": 1
+        },
+        "own_production": {
+            "Megacredits": 1
+        },
+        "immediate_impacts": [
+            {
+                "GainResource": [
+                    "Plants",
+                    2
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Carbonate Processing",
+        "kind": "Automatic",
+        "tags": [
+            "Building"
+        ],
+        "cost": {
+            "Building": 6
+        },
+        "own_production": {
+            "Energy": -1,
+            "Heat": 3
+        }
+    },
+    {
+        "name": "Cupola City",
+        "kind": "Automatic",
+        "tags": [
+            "City",
+            "Building"
+        ],
+        "cost": {
+            "Building": 16
+        },
+        "requirements": [
+            {
+                "MaxOxygen": 9
+            }
+        ],
+        "own_production": {
+            "Energy": -1,
+            "Megacredits": 3
+        },
+        "immediate_impacts": [
+            {
+                "PlaceCity": "RegularCity"
+            }
+        ]
+    },
+    {
+        "name": "Herbivores",
+        "kind": "Automatic",
+        "tags": [
+            "Animal"
+        ],
+        "cost": {
+            "Megacredits": 12
+        },
+        "requirements": [
+            {
+                "MinOxygen": 8
+            }
+        ],
+        "points": {
+            "PerCardResource": [
+                1,
+                2,
+                "Animal"
+            ]
+        },
+        "any_production": {
+            "Plants": -1
+        },
+        "immediate_impacts": [
+            {
+                "AddResourceToSameCard": [
+                    "Animal",
+                    1
+                ]
+            }
+        ],
+        "effects": [
+            {
+                "GainCardResourceForOwnImpact": [
+                    "Animal",
+                    1,
+                    [
+                        {
+                            "PlaceGreenery": null
+                        }
+                    ]
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Mining Expedition",
+        "kind": "Event",
+        "tags": [],
+        "cost": {
+            "Megacredits": 12
+        },
+        "immediate_impacts": [
+            "RaiseOxygen",
+            {
+                "DestroyAnyPlants": 2
+            },
+            {
+                "GainResource": [
+                    "Steel",
+                    2
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Eos Chasma National Park",
+        "kind": "Automatic",
+        "tags": [
+            "Plant",
+            "Building"
+        ],
+        "cost": {
+            "Building": 16
+        },
+        "requirements": [
+            {
+                "MinTemperature": -12
+            }
+        ],
+        "points": {
+            "Immediate": 1
+        },
+        "own_production": {
+            "Megacredits": 2
+        },
+        "immediate_impacts": [
+            {
+                "AddResourceToAnyCard": [
+                    "Animal",
+                    1
+                ]
+            },
+            {
+                "GainResource": [
+                    "Plants",
+                    3
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Underground City",
+        "kind": "Automatic",
+        "tags": [
+            "City",
+            "Building"
+        ],
+        "cost": {
+            "Building": 18
+        },
+        "own_production": {
+            "Energy": -2,
+            "Steel": 2
+        },
+        "immediate_impacts": [
+            {
+                "PlaceCity": "RegularCity"
+            }
+        ]
+    },
+    {
+        "name": "Heather",
+        "kind": "Automatic",
+        "tags": [
+            "Plant"
+        ],
+        "cost": {
+            "Megacredits": 6
+        },
+        "requirements": [
+            {
+                "MinTemperature": -14
+            }
+        ],
+        "own_production": {
+            "Plants": 2
+        },
+        "immediate_impacts": [
+            {
+                "GainResource": [
+                    "Plants",
+                    1
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Robotic Workforce",
+        "kind": "Automatic",
+        "tags": [
+            "Science"
+        ],
+        "cost": {
+            "Megacredits": 9
+        },
+        "immediate_impacts": [
+            {
+                "CopyProductionOfCard": "Building"
+            }
+        ]
+    },
+    {
+        "name": "Protected Valley",
+        "kind": "Automatic",
+        "tags": [
+            "Plant",
+            "Building"
+        ],
+        "cost": {
+            "Building": 23
+        },
+        "own_production": {
+            "Megacredits": 2
+        },
+        "immediate_impacts": [
+            {
+                "PlaceGreenery": "ReservedForOcean"
+            }
+        ]
+    },
+    {
+        "name": "Industrial Microbes",
+        "kind": "Automatic",
+        "tags": [
+            "Microbe",
+            "Building"
+        ],
+        "cost": {
+            "Building": 12
+        },
+        "own_production": {
+            "Energy": 1,
+            "Steel": 1
+        }
+    },
+    {
+        "name": "Rad-Chem Factory",
+        "kind": "Automatic",
+        "tags": [
+            "Building"
+        ],
+        "cost": {
+            "Building": 8
+        },
+        "own_production": {
+            "Energy": -1
+        },
+        "immediate_impacts": [
+            "RaiseTerraformRating",
+            "RaiseTerraformRating"
+        ]
+    },
+    {
+        "name": "Urbanized Area",
+        "kind": "Automatic",
+        "tags": [
+            "City",
+            "Building"
+        ],
+        "cost": {
+            "Building": 10
+        },
+        "own_production": {
+            "Energy": -1,
+            "Megacredits": 2
+        },
+        "immediate_impacts": [
+            {
+                "PlaceCity": "UrbanizedArea"
+            }
+        ]
+    },
+    {
+        "name": "Giant Space Mirror",
+        "kind": "Automatic",
+        "tags": [
+            "Power",
+            "Space"
+        ],
+        "cost": {
+            "Space": 17
+        },
+        "own_production": {
+            "Energy": 3
+        }
+    },
+    {
+        "name": "Trees",
+        "kind": "Automatic",
+        "tags": [
+            "Plant"
+        ],
+        "cost": {
+            "Megacredits": 13
+        },
+        "requirements": [
+            {
+                "MinTemperature": -4
+            }
+        ],
+        "points": {
+            "Immediate": 1
+        },
+        "own_production": {
+            "Plants": 3
+        },
+        "immediate_impacts": [
+            {
+                "GainResource": [
+                    "Plants",
+                    1
+                ]
+            }
+        ]
+    }
+]

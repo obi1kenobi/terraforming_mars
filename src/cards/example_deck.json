@@ -1,0 +1,89 @@
+[
+    {
+        "name": "Electro Catapult",
+        "kind": "Active",
+        "tags": [
+            "Building"
+        ],
+        "cost": {
+            "Building": 17
+        },
+        "requirements": [
+            {
+                "MaxOxygen": 8
+            }
+        ],
+        "points": {
+            "Immediate": 1
+        },
+        "own_production": {
+            "Energy": -1
+        },
+        "actions": [
+            {
+                "ResourceConversion": {
+                    "cost": {
+                        "Plants": 1
+                    },
+                    "production": {
+                        "Megacredits": 7
+                    }
+                }
+            },
+            {
+                "ResourceConversion": {
+                    "cost": {
+                        "Steel": 1
+                    },
+                    "production": {
+                        "Megacredits": 7
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "name": "Asteroid Mining",
+        "kind": "Automatic",
+        "tags": [
+            "Jovian",
+            "Space"
+        ],
+        "cost": {
+            "Space": 30
+        },
+        "points": {
+            "Immediate": 2
+        },
+        "own_production": {
+            "Titanium": 2
+        }
+    },
+    {
+        "name": "Asteroid Mining Consortium",
+        "kind": "Automatic",
+        "tags": [
+            "Jovian"
+        ],
+        "cost": {
+            "Megacredits": 13
+        },
+        "requirements": [
+            {
+                "MinProduction": [
+                    "Titanium",
+                    1
+                ]
+            }
+        ],
+        "points": {
+            "Immediate": 1
+        },
+        "own_production": {
+            "Titanium": 1
+        },
+        "any_production": {
+            "Titanium": -1
+        }
+    }
+]
