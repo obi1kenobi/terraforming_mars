@@ -1,11 +1,11 @@
 #![allow(dead_code)]
 
 use serde::{Deserialize, Serialize};
+use std::hash::Hash;
 use std::{
     collections::{HashMap, HashSet},
     num::NonZeroUsize,
 };
-use std::hash::Hash;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub(crate) enum CardTag {
@@ -20,6 +20,7 @@ pub(crate) enum CardTag {
     Animal,
     City,
     Wild,
+    Event,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -47,7 +48,10 @@ pub(crate) enum CardRequirement {
     MinOxygen(usize),
     MaxTemperature(isize),
     MinTemperature(isize),
+    MaxOceans(usize),
+    MinOceans(usize),
     MinTags(CardTag, NonZeroUsize),
+    MinCities(NonZeroUsize),
     MinGreeneries(NonZeroUsize),
     MinProduction(Resource, NonZeroUsize),
 }
@@ -90,6 +94,9 @@ pub(crate) enum CardAction {
     AddResourceToSameCard(AddCardResourceAction),
     GainResourcesPerCityOnMars(GainResourcePerCityOnMarsAction),
     RevealAndDiscardCardToGainCardResource(RevealAndDiscardCardToGainCardResourceAction),
+    DecreaseProductionToCauseImpact(Resource, usize, ImmediateImpact),
+    SpendCardResourceToCauseImpact(CardResource, usize, ImmediateImpact),
+    SpendResourceToCauseImpact(Resource, usize, ImmediateImpact),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -128,15 +135,16 @@ pub(crate) enum ImmediateImpact {
     RaiseTemperature,
     RaiseOxygen,
     RaiseTerraformRating,
-    
+
     // None in the option means "placed anywhere"
     PlaceOcean(Option<LocationKind>),
     PlaceGreenery(Option<LocationKind>),
     PlaceCity(Option<CityKind>),
-    
+
     DrawCard(usize),
-    AddResourceToSameCard(CardResource, usize),
-    AddResourceToAnyCard(CardResource, usize),
+    AddResourceToSameCard(CardResource, usize), // card that caused the impact
+    AddResourceToAnotherCard(CardResource, usize), // *not* the card that caused the impact
+    AddResourceToAnyCard(CardResource, usize), // any card, including the one that caused the impact
     GainResource(Resource, usize),
     DestroyOwnPlants(usize),
     DestroyAnyPlants(usize),
@@ -180,7 +188,7 @@ pub(crate) enum CardEffect {
     GainProductionForAnyImpact(Resource, isize, HashSet<ImmediateImpact>),
 
     // gain production when anyone plays a card with this tag
-    GainProductionForCardTagPlayed(Resource, isize, CardTag),
+    GainProductionForAnyTagPlayed(Resource, isize, CardTag),
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -239,6 +247,7 @@ impl Card {
         if kind == CardKind::Event {
             // Events have no actions.
             assert!(actions.is_empty());
+            assert!(tags.contains(&CardTag::Event));
         }
 
         Self {
@@ -304,7 +313,48 @@ pub fn main() {}
 
 #[cfg(test)]
 mod tests {
-    use crate::Card;
+    use crate::{Card, CardKind, CardTag, ResourceCost};
+
+    fn is_card_valid(card: &Card) -> bool {
+        let mut is_valid = true;
+
+        if card.kind == CardKind::Active {
+            is_valid &= !card.actions.is_empty();
+        } else {
+            is_valid &= card.actions.is_empty();
+        }
+
+        if card.kind == CardKind::Event {
+            is_valid &= card.effects.is_empty();
+
+            is_valid &= card.tags.contains(&CardTag::Event);
+        }
+
+        if card.tags.contains(&CardTag::Event) {
+            is_valid &= card.kind == CardKind::Event;
+        }
+
+        match card.cost {
+            ResourceCost::Building(_) => {
+                is_valid &= card.tags.contains(&CardTag::Building);
+                is_valid &= !card.tags.contains(&CardTag::Space);
+            }
+            ResourceCost::Space(_) => {
+                is_valid &= !card.tags.contains(&CardTag::Building);
+                is_valid &= card.tags.contains(&CardTag::Space);
+            }
+            ResourceCost::SpaceOrBuilding(_) => {
+                is_valid &= card.tags.contains(&CardTag::Building);
+                is_valid &= card.tags.contains(&CardTag::Space);
+            }
+            ResourceCost::Megacredits(_) | _ => {
+                is_valid &= !card.tags.contains(&CardTag::Building);
+                is_valid &= !card.tags.contains(&CardTag::Space);
+            }
+        }
+
+        is_valid
+    }
 
     #[test]
     fn base_deck_is_valid() {
@@ -312,6 +362,9 @@ mod tests {
 
         let cards: Vec<Card> = serde_json::from_str(base_deck_text).unwrap();
         assert!(!cards.is_empty());
+
+        let invalid_cards: Vec<_> = cards.iter().filter(|x| !is_card_valid(x)).collect();
+        assert!(invalid_cards.is_empty(), "{:?}", invalid_cards);
     }
 
     #[test]
@@ -320,5 +373,8 @@ mod tests {
 
         let cards: Vec<Card> = serde_json::from_str(base_deck_text).unwrap();
         assert!(!cards.is_empty());
+
+        let invalid_cards: Vec<_> = cards.iter().filter(|x| !is_card_valid(x)).collect();
+        assert!(invalid_cards.is_empty(), "{:?}", invalid_cards);
     }
 }

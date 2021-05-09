@@ -60,7 +60,8 @@
         "name": "Convoy From Europa",
         "kind": "Event",
         "tags": [
-            "Space"
+            "Space",
+            "Event"
         ],
         "cost": {
             "Space": 15
@@ -323,7 +324,9 @@
     {
         "name": "Mining Expedition",
         "kind": "Event",
-        "tags": [],
+        "tags": [
+            "Event"
+        ],
         "cost": {
             "Megacredits": 12
         },
@@ -550,5 +553,776 @@
                 ]
             }
         ]
+    },
+    {
+        "name": "Fish",
+        "kind": "Active",
+        "tags": [
+            "Animal"
+        ],
+        "cost": {
+            "Megacredits": 9
+        },
+        "requirements": [
+            {
+                "MinTemperature": 2
+            }
+        ],
+        "points": {
+            "PerCardResource": [
+                1,
+                1,
+                "Animal"
+            ]
+        },
+        "any_production": {
+            "Plants": -1
+        },
+        "actions": [
+            {
+                "AddResourceToSameCard": {
+                    "card_resource": "Animal",
+                    "count": 1
+                }
+            }
+        ]
+    },
+    {
+        "name": "Electro Catapult",
+        "kind": "Active",
+        "tags": [
+            "Building"
+        ],
+        "cost": {
+            "Building": 17
+        },
+        "requirements": [
+            {
+                "MaxOxygen": 8
+            }
+        ],
+        "points": {
+            "Immediate": 1
+        },
+        "own_production": {
+            "Energy": -1
+        },
+        "actions": [
+            {
+                "ResourceConversion": {
+                    "cost": {
+                        "Plants": 1
+                    },
+                    "production": {
+                        "Megacredits": 7
+                    }
+                }
+            },
+            {
+                "ResourceConversion": {
+                    "cost": {
+                        "Steel": 1
+                    },
+                    "production": {
+                        "Megacredits": 7
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "name": "Geothermal Power",
+        "kind": "Automatic",
+        "tags": [
+            "Power",
+            "Building"
+        ],
+        "cost": {
+            "Building": 11
+        },
+        "own_production": {
+            "Energy": 2
+        }
+    },
+    {
+        "name": "Deimos Down",
+        "kind": "Event",
+        "tags": [
+            "Space",
+            "Event"
+        ],
+        "cost": {
+            "Space": 31
+        },
+        "immediate_impacts": [
+            "RaiseTemperature",
+            "RaiseTemperature",
+            "RaiseTemperature",
+            {
+                "GainResource": [
+                    "Steel",
+                    4
+                ]
+            },
+            {
+                "DestroyAnyPlants": 8
+            }
+        ]
+    },
+    {
+        "name": "Immigrant City",
+        "kind": "Automatic",
+        "tags": [
+            "City",
+            "Building"
+        ],
+        "cost": {
+            "Building": 13
+        },
+        "own_production": {
+            "Energy": -1,
+            "Megacredits": -2
+        },
+        "immediate_impacts": [
+            {
+                "PlaceCity": "RegularCity"
+            }
+        ],
+        "effects": [
+            {
+                "GainProductionForAnyImpact": [
+                    "Megacredits",
+                    1,
+                    [
+                        {
+                            "PlaceCity": null
+                        }
+                    ]
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Equatorial Magnetizer",
+        "kind": "Active",
+        "tags": [
+            "Building"
+        ],
+        "cost": {
+            "Building": 11
+        },
+        "actions": [
+            {
+                "DecreaseProductionToCauseImpact": [
+                    "Energy",
+                    1,
+                    "RaiseTerraformRating"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Beam From A Thorium Asteroid",
+        "kind": "Automatic",
+        "tags": [
+            "Jovian",
+            "Space",
+            "Power"
+        ],
+        "cost": {
+            "Space": 32
+        },
+        "points": {
+            "Immediate": 1
+        },
+        "requirements": [
+            {
+                "MinTags": [
+                    "Jovian",
+                    1
+                ]
+            }
+        ],
+        "own_production": {
+            "Heat": 3,
+            "Energy": 3
+        }
+    },
+    {
+        "name": "Peroxide Power",
+        "kind": "Automatic",
+        "tags": [
+            "Power",
+            "Building"
+        ],
+        "cost": {
+            "Building": 7
+        },
+        "own_production": {
+            "Megacredits": -1,
+            "Energy": 2
+        }
+    },
+    {
+        "name": "Dust Seals",
+        "kind": "Automatic",
+        "tags": [],
+        "cost": {
+            "Megacredits": 2
+        },
+        "points": {
+            "Immediate": 1
+        },
+        "requirements": [
+            {
+                "MaxOceans": 3
+            }
+        ]
+    },
+    {
+        "name": "Noctis City",
+        "kind": "Automatic",
+        "tags": [
+            "City",
+            "Building"
+        ],
+        "cost": {
+            "Building": 18
+        },
+        "own_production": {
+            "Energy": -1,
+            "Megacredits": 3
+        },
+        "immediate_impacts": [
+            {
+                "PlaceCity": "NoctisCity"
+            }
+        ]
+    },
+    {
+        "name": "Fusion Power",
+        "kind": "Automatic",
+        "tags": [
+            "Science",
+            "Power",
+            "Building"
+        ],
+        "cost": {
+            "Building": 14
+        },
+        "requirements": [
+            {
+                "MinTags": [
+                    "Power",
+                    2
+                ]
+            }
+        ],
+        "own_production": {
+            "Energy": 3
+        }
+    },
+    {
+        "name": "Micro-mills",
+        "kind": "Automatic",
+        "tags": [],
+        "cost": {
+            "Megacredits": 3
+        },
+        "own_production": {
+            "Heat": 1
+        }
+    },
+    {
+        "name": "Hackers",
+        "kind": "Automatic",
+        "tags": [],
+        "cost": {
+            "Megacredits": 3
+        },
+        "points": {
+            "Immediate": -1
+        },
+        "any_production": {
+            "Megacredits": -2
+        },
+        "own_production": {
+            "Energy": -1,
+            "Megacredits": 2
+        }
+    },
+    {
+        "name": "Biomass Combustors",
+        "kind": "Automatic",
+        "tags": [
+            "Power",
+            "Building"
+        ],
+        "cost": {
+            "Building": 4
+        },
+        "requirements": [
+            {
+                "MinOxygen": 6
+            }
+        ],
+        "points": {
+            "Immediate": -1
+        },
+        "any_production": {
+            "Plants": -1
+        },
+        "own_production": {
+            "Energy": 2
+        }
+    },
+    {
+        "name": "Designed Microorganisms",
+        "kind": "Automatic",
+        "tags": [
+            "Science",
+            "Microbe"
+        ],
+        "cost": {
+            "Megacredits": 16
+        },
+        "requirements": [
+            {
+                "MaxTemperature": -14
+            }
+        ],
+        "own_production": {
+            "Plants": 2
+        }
+    },
+    {
+        "name": "Towing A Comet",
+        "kind": "Event",
+        "tags": [
+            "Space",
+            "Event"
+        ],
+        "cost": {
+            "Space": 23
+        },
+        "immediate_impacts": [
+            {
+                "GainResource": [
+                    "Plants",
+                    2
+                ]
+            },
+            "RaiseOxygen",
+            {
+                "PlaceOcean": "ReservedForOcean"
+            }
+        ]
+    },
+    {
+        "name": "Arctic Algae",
+        "kind": "Automatic",
+        "tags": [
+            "Plant"
+        ],
+        "cost": {
+            "Megacredits": 12
+        },
+        "requirements": [
+            {
+                "MaxTemperature": -12
+            }
+        ],
+        "immediate_impacts": [
+            {
+                "GainResource": [
+                    "Plants",
+                    1
+                ]
+            }
+        ],
+        "effects": [
+            {
+                "GainResourceForAnyImpact": [
+                    "Plants",
+                    2,
+                    [
+                        {
+                            "PlaceOcean": null
+                        }
+                    ]
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Rover Construction",
+        "kind": "Automatic",
+        "tags": [
+            "Building"
+        ],
+        "cost": {
+            "Building": 8
+        },
+        "points": {
+            "Immediate": 1
+        },
+        "effects": [
+            {
+                "GainResourceForAnyImpact": [
+                    "Megacredits",
+                    2,
+                    [
+                        {
+                            "PlaceCity": null
+                        }
+                    ]
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Food Factory",
+        "kind": "Automatic",
+        "tags": [
+            "Building"
+        ],
+        "cost": {
+            "Building": 12
+        },
+        "points": {
+            "Immediate": 1
+        },
+        "own_production": {
+            "Plants": -1,
+            "Megacredits": 4
+        }
+    },
+    {
+        "name": "Nitrite Reducing Bacteria",
+        "kind": "Active",
+        "tags": [
+            "Microbe"
+        ],
+        "cost": {
+            "Megacredits": 11
+        },
+        "immediate_impacts": [
+            {
+                "AddResourceToSameCard": [
+                    "Microbe",
+                    1
+                ]
+            }
+        ],
+        "actions": [
+            {
+                "AddResourceToSameCard": {
+                    "card_resource": "Microbe",
+                    "count": 1
+                }
+            },
+            {
+                "SpendCardResourceToCauseImpact": [
+                    "Microbe",
+                    3,
+                    "RaiseTerraformRating"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Nuclear Power",
+        "kind": "Automatic",
+        "tags": [
+            "Power",
+            "Building"
+        ],
+        "cost": {
+            "Building": 10
+        },
+        "own_production": {
+            "Megacredits": -2,
+            "Energy": 3
+        }
+    },
+    {
+        "name": "Nitrophilic Moss",
+        "kind": "Automatic",
+        "tags": [
+            "Plant"
+        ],
+        "cost": {
+            "Megacredits": 8
+        },
+        "requirements": [
+            {
+                "MinOceans": 3
+            }
+        ],
+        "immediate_impacts": [
+            {
+                "DestroyOwnPlants": 2
+            }
+        ],
+        "own_production": {
+            "Plants": 2
+        }
+    },
+    {
+        "name": "Birds",
+        "kind": "Active",
+        "tags": [
+            "Animal"
+        ],
+        "cost": {
+            "Megacredits": 10
+        },
+        "requirements": [
+            {
+                "MinOxygen": 13
+            }
+        ],
+        "points": {
+            "PerCardResource": [
+                1,
+                1,
+                "Animal"
+            ]
+        },
+        "any_production": {
+            "Plants": -2
+        },
+        "actions": [
+            {
+                "AddResourceToSameCard": {
+                    "card_resource": "Animal",
+                    "count": 1
+                }
+            }
+        ]
+    },
+    {
+        "name": "Moss",
+        "kind": "Automatic",
+        "tags": [
+            "Plant"
+        ],
+        "cost": {
+            "Megacredits": 4
+        },
+        "requirements": [
+            {
+                "MinOceans": 3
+            }
+        ],
+        "immediate_impacts": [
+            {
+                "DestroyOwnPlants": 1
+            }
+        ],
+        "own_production": {
+            "Plants": 1
+        }
+    },
+    {
+        "name": "Lake Marineris",
+        "kind": "Automatic",
+        "tags": [],
+        "cost": {
+            "Megacredits": 18
+        },
+        "requirements": [
+            {
+                "MinTemperature": 0
+            }
+        ],
+        "points": {
+            "Immediate": 2
+        },
+        "immediate_impacts": [
+            {
+                "PlaceOcean": "ReservedForOcean"
+            },
+            {
+                "PlaceOcean": "ReservedForOcean"
+            }
+        ]
+    },
+    {
+        "name": "Black Polar Dust",
+        "kind": "Automatic",
+        "tags": [],
+        "cost": {
+            "Megacredits": 15
+        },
+        "own_production": {
+            "Megacredits": -2,
+            "Heat": 3
+        },
+        "immediate_impacts": [
+            {
+                "PlaceOcean": "ReservedForOcean"
+            }
+        ]
+    },
+    {
+        "name": "Aerobraked Ammonia Asteroid",
+        "kind": "Event",
+        "tags": [
+            "Space",
+            "Event"
+        ],
+        "cost": {
+            "Space": 26
+        },
+        "own_production": {
+            "Heat": 3,
+            "Plants": 1
+        },
+        "immediate_impacts": [
+            {
+                "AddResourceToAnotherCard": [
+                    "Microbe",
+                    2
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Great Dam",
+        "kind": "Automatic",
+        "tags": [
+            "Power",
+            "Building"
+        ],
+        "cost": {
+            "Building": 12
+        },
+        "requirements": [
+            {
+                "MinOceans": 4
+            }
+        ],
+        "points": {
+            "Immediate": 1
+        },
+        "own_production": {
+            "Energy": 2
+        }
+    },
+    {
+        "name": "Livestock",
+        "kind": "Active",
+        "tags": [
+            "Animal"
+        ],
+        "cost": {
+            "Megacredits": 13
+        },
+        "requirements": [
+            {
+                "MinOxygen": 9
+            }
+        ],
+        "points": {
+            "PerCardResource": [
+                1,
+                1,
+                "Animal"
+            ]
+        },
+        "own_production": {
+            "Plants": -1,
+            "Megacredits": 2
+        },
+        "actions": [
+            {
+                "AddResourceToSameCard": {
+                    "card_resource": "Animal",
+                    "count": 1
+                }
+            }
+        ]
+    },
+    {
+        "name": "Tectonic Stress Power",
+        "kind": "Automatic",
+        "tags": [
+            "Power",
+            "Building"
+        ],
+        "cost": {
+            "Building": 18
+        },
+        "requirements": [
+            {
+                "MinTags": [
+                    "Science",
+                    2
+                ]
+            }
+        ],
+        "points": {
+            "Immediate": 1
+        },
+        "own_production": {
+            "Energy": 3
+        }
+    },
+    {
+        "name": "Breathing Filters",
+        "kind": "Automatic",
+        "tags": [
+            "Science"
+        ],
+        "cost": {
+            "Megacredits": 11
+        },
+        "requirements": [
+            {
+                "MinOxygen": 7
+            }
+        ],
+        "points": {
+            "Immediate": 2
+        }
+    },
+    {
+        "name": "Giant Ice Asteroids",
+        "kind": "Event",
+        "tags": [
+            "Space",
+            "Event"
+        ],
+        "cost": {
+            "Space": 36
+        },
+        "immediate_impacts": [
+            "RaiseTemperature",
+            "RaiseTemperature",
+            {
+                "PlaceOcean": "ReservedForOcean"
+            },
+            {
+                "PlaceOcean": "ReservedForOcean"
+            },
+            {
+                "DestroyAnyPlants": 6
+            }
+        ]
+    },
+    {
+        "name": "GHG Factories",
+        "kind": "Automatic",
+        "tags": [
+            "Building"
+        ],
+        "cost": {
+            "Building": 11
+        },
+        "own_production": {
+            "Energy": -1,
+            "Heat": 4
+        }
     }
 ]

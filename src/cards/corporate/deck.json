@@ -12,7 +12,8 @@
         "points": {
             "Immediate": 1
         }
-    }, {
+    },
+    {
         "name": "Space Elevator",
         "kind": "Active",
         "tags": [
@@ -46,7 +47,8 @@
         "kind": "Event",
         "tags": [
             "Science",
-            "Space"
+            "Space",
+            "Event"
         ],
         "cost": {
             "Space": 5
@@ -120,7 +122,9 @@
             "Megacredits": 3
         },
         "immediate_impacts": [
-            {"PlaceCity": "RegularCity"}
+            {
+                "PlaceCity": "RegularCity"
+            }
         ]
     },
     {
@@ -134,14 +138,100 @@
         },
         "requirements": [
             {
-                "MinTags": ["Power", 2]
+                "MinTags": [
+                    "Power",
+                    2
+                ]
             }
         ],
-        "own_production": {
-            "Energy": 1
-        },
         "any_production": {
             "Energy": -1
+        },
+        "own_production": {
+            "Energy": 1
+        }
+    },
+    {
+        "name": "Asteroid Mining Consortium",
+        "kind": "Automatic",
+        "tags": [
+            "Jovian"
+        ],
+        "cost": {
+            "Megacredits": 13
+        },
+        "points": {
+            "Immediate": 1
+        },
+        "requirements": [
+            {
+                "MinProduction": [
+                    "Titanium",
+                    1
+                ]
+            }
+        ],
+        "any_production": {
+            "Titanium": -1
+        },
+        "own_production": {
+            "Titanium": 1
+        }
+    },
+    {
+        "name": "Callisto Penal Mines",
+        "kind": "Automatic",
+        "tags": [
+            "Jovian",
+            "Space"
+        ],
+        "cost": {
+            "Space": 24
+        },
+        "points": {
+            "Immediate": 2
+        },
+        "own_production": {
+            "Megacredits": 3
+        }
+    },
+    {
+        "name": "Lightning Harvest",
+        "kind": "Automatic",
+        "tags": [
+            "Power"
+        ],
+        "cost": {
+            "Megacredits": 8
+        },
+        "requirements": [
+            {
+                "MinTags": [
+                    "Science",
+                    3
+                ]
+            }
+        ],
+        "points": {
+            "Immediate": 1
+        },
+        "own_production": {
+            "Energy": 1,
+            "Megacredits": 1
+        }
+    },
+    {
+        "name": "Rad-Suits",
+        "kind": "Automatic",
+        "tags": [],
+        "cost": {
+            "Megacredits": 6
+        },
+        "points": {
+            "Immediate": 1
+        },
+        "own_production": {
+            "Megacredits": 1
         }
     }
 ]
