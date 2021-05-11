@@ -89,45 +89,14 @@ pub(crate) enum VictoryPointValue {
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub(crate) enum CardAction {
-    ResourceConversion(ResourceConversionAction),
-    DrawCard(DrawCardsAction),
-    AddResourceToSameCard(AddCardResourceAction),
-    GainResourcesPerCityOnMars(GainResourcePerCityOnMarsAction),
-    RevealAndDiscardCardToGainCardResource(RevealAndDiscardCardToGainCardResourceAction),
-    DecreaseProductionToCauseImpact(Resource, usize, ImmediateImpact),
-    SpendCardResourceToCauseImpact(CardResource, usize, ImmediateImpact),
-    SpendResourceToCauseImpact(Resource, usize, ImmediateImpact),
-}
+    CauseFreeImpact(ImmediateImpact),
+    SpendResource(Resource, usize, ImmediateImpact),
+    SpendSameCardResource(CardResource, usize, ImmediateImpact),
+    SpendProduction(Resource, usize, ImmediateImpact),
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub(crate) struct ResourceConversionAction {
-    cost: HashMap<Resource, usize>,
-    production: HashMap<Resource, usize>,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub(crate) struct DrawCardsAction {
-    cost: HashMap<Resource, usize>,
-    draw_size: usize,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub(crate) struct AddCardResourceAction {
-    card_resource: CardResource,
-    count: usize,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub(crate) struct GainResourcePerCityOnMarsAction {
-    cost: HashMap<Resource, usize>,
-    production_per_city: HashMap<Resource, usize>,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub(crate) struct RevealAndDiscardCardToGainCardResourceAction {
-    cost: HashMap<Resource, usize>,
-    sought_tags: HashSet<CardTag>,
-    gained_resources: HashMap<CardResource, usize>,
+    // pay resource in given quantity, then draw and discard a card from the main deck;
+    // if the card contains the specified tag, cause the specified impact
+    RandomizeBasedOnRevealedCardTag(Resource, usize, CardTag, ImmediateImpact),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -146,6 +115,7 @@ pub(crate) enum ImmediateImpact {
     AddResourceToAnotherCard(CardResource, usize), // *not* the card that caused the impact
     AddResourceToAnyCard(CardResource, usize), // any card, including the one that caused the impact
     GainResource(Resource, usize),
+    GainResourcePerCityOnMars(Resource, usize),
     DestroyOwnPlants(usize),
     DestroyAnyPlants(usize),
     PlaceSpecialTile(SpecialTile),

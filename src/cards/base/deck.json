@@ -86,14 +86,16 @@
         },
         "actions": [
             {
-                "GainResourcesPerCityOnMars": {
-                    "cost": {
-                        "Energy": 1
-                    },
-                    "production_per_city": {
-                        "Megacredits": 1
+                "SpendResource": [
+                    "Energy",
+                    1,
+                    {
+                        "GainResourcePerCityOnMars": [
+                            "Megacredits",
+                            1
+                        ]
                     }
-                }
+                ]
             }
         ]
     },
@@ -119,17 +121,17 @@
         },
         "actions": [
             {
-                "RevealAndDiscardCardToGainCardResource": {
-                    "cost": {
-                        "Megacredits": 1
-                    },
-                    "sought_tags": [
-                        "Microbe"
-                    ],
-                    "gained_resources": {
-                        "Science": 1
+                "RandomizeBasedOnRevealedCardTag": [
+                    "Megacredits",
+                    1,
+                    "Microbe",
+                    {
+                        "AddResourceToSameCard": [
+                            "Science",
+                            1
+                        ]
                     }
-                }
+                ]
             }
         ]
     },
@@ -159,9 +161,11 @@
         },
         "actions": [
             {
-                "AddResourceToSameCard": {
-                    "card_resource": "Animal",
-                    "count": 1
+                "CauseFreeImpact": {
+                    "AddResourceToSameCard": [
+                        "Animal",
+                        1
+                    ]
                 }
             }
         ]
@@ -580,9 +584,11 @@
         },
         "actions": [
             {
-                "AddResourceToSameCard": {
-                    "card_resource": "Animal",
-                    "count": 1
+                "CauseFreeImpact": {
+                    "AddResourceToSameCard": [
+                        "Animal",
+                        1
+                    ]
                 }
             }
         ]
@@ -609,24 +615,28 @@
         },
         "actions": [
             {
-                "ResourceConversion": {
-                    "cost": {
-                        "Plants": 1
-                    },
-                    "production": {
-                        "Megacredits": 7
+                "SpendResource": [
+                    "Plants",
+                    1,
+                    {
+                        "GainResource": [
+                            "Megacredits",
+                            7
+                        ]
                     }
-                }
+                ]
             },
             {
-                "ResourceConversion": {
-                    "cost": {
-                        "Steel": 1
-                    },
-                    "production": {
-                        "Megacredits": 7
+                "SpendResource": [
+                    "Steel",
+                    1,
+                    {
+                        "GainResource": [
+                            "Megacredits",
+                            7
+                        ]
                     }
-                }
+                ]
             }
         ]
     },
@@ -713,7 +723,7 @@
         },
         "actions": [
             {
-                "DecreaseProductionToCauseImpact": [
+                "SpendProduction": [
                     "Energy",
                     1,
                     "RaiseTerraformRating"
@@ -1016,13 +1026,15 @@
         ],
         "actions": [
             {
-                "AddResourceToSameCard": {
-                    "card_resource": "Microbe",
-                    "count": 1
+                "CauseFreeImpact": {
+                    "AddResourceToSameCard": [
+                        "Microbe",
+                        1
+                    ]
                 }
             },
             {
-                "SpendCardResourceToCauseImpact": [
+                "SpendSameCardResource": [
                     "Microbe",
                     3,
                     "RaiseTerraformRating"
@@ -1094,9 +1106,11 @@
         },
         "actions": [
             {
-                "AddResourceToSameCard": {
-                    "card_resource": "Animal",
-                    "count": 1
+                "CauseFreeImpact": {
+                    "AddResourceToSameCard": [
+                        "Animal",
+                        1
+                    ]
                 }
             }
         ]
@@ -1237,9 +1251,11 @@
         },
         "actions": [
             {
-                "AddResourceToSameCard": {
-                    "card_resource": "Animal",
-                    "count": 1
+                "CauseFreeImpact": {
+                    "AddResourceToSameCard": [
+                        "Animal",
+                        1
+                    ]
                 }
             }
         ]
@@ -1324,5 +1340,114 @@
             "Energy": -1,
             "Heat": 4
         }
+    },
+    {
+        "name": "Heat Trappers",
+        "kind": "Automatic",
+        "tags": [
+            "Power",
+            "Building"
+        ],
+        "cost": {
+            "Building": 6
+        },
+        "points": {
+            "Immediate": -1
+        },
+        "any_production": {
+            "Heat": -2
+        },
+        "own_production": {
+            "Energy": 1
+        }
+    },
+    {
+        "name": "Deep Well Heating",
+        "kind": "Automatic",
+        "tags": [
+            "Power",
+            "Building"
+        ],
+        "cost": {
+            "Building": 13
+        },
+        "own_production": {
+            "Energy": 1
+        },
+        "immediate_impacts": [
+            "RaiseTemperature"
+        ]
+    },
+    {
+        "name": "Space Station",
+        "kind": "Automatic",
+        "tags": [
+            "Space"
+        ],
+        "cost": {
+            "Space": 10
+        },
+        "points": {
+            "Immediate": 1
+        },
+        "effects": [
+            {
+                "CardDiscountForTag": [
+                    "Space",
+                    2
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Solar Power",
+        "kind": "Automatic",
+        "tags": [
+            "Power",
+            "Building"
+        ],
+        "cost": {
+            "Building": 11
+        },
+        "points": {
+            "Immediate": 1
+        },
+        "own_production": {
+            "Energy": 1
+        }
+    },
+    {
+        "name": "Open City",
+        "kind": "Automatic",
+        "tags": [
+            "City",
+            "Building"
+        ],
+        "cost": {
+            "Building": 23
+        },
+        "requirements": [
+            {
+                "MinOxygen": 12
+            }
+        ],
+        "points": {
+            "Immediate": 1
+        },
+        "own_production": {
+            "Energy": -1,
+            "Megacredits": 4
+        },
+        "immediate_impacts": [
+            {
+                "GainResource": [
+                    "Plants",
+                    2
+                ]
+            },
+            {
+                "PlaceCity": "RegularCity"
+            }
+        ]
     }
 ]

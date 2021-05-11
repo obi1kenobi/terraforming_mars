@@ -31,14 +31,16 @@
         },
         "actions": [
             {
-                "ResourceConversion": {
-                    "cost": {
-                        "Steel": 1
-                    },
-                    "production": {
-                        "Megacredits": 5
+                "SpendResource": [
+                    "Steel",
+                    1,
+                    {
+                        "GainResource": [
+                            "Megacredits",
+                            5
+                        ]
                     }
-                }
+                ]
             }
         ]
     },
@@ -231,6 +233,21 @@
             "Immediate": 1
         },
         "own_production": {
+            "Megacredits": 1
+        }
+    },
+    {
+        "name": "Fuel Factory",
+        "kind": "Automatic",
+        "tags": [
+            "Building"
+        ],
+        "cost": {
+            "Building": 6
+        },
+        "own_production": {
+            "Energy": -1,
+            "Titanium": 1,
             "Megacredits": 1
         }
     }
