@@ -250,5 +250,248 @@
             "Titanium": 1,
             "Megacredits": 1
         }
+    },
+    {
+        "name": "Tropical Resort",
+        "kind": "Automatic",
+        "tags": [
+            "Building"
+        ],
+        "cost": {
+            "Building": 13
+        },
+        "points": {
+            "Immediate": 2
+        },
+        "own_production": {
+            "Heat": -2,
+            "Megacredits": 3
+        }
+    },
+    {
+        "name": "Great Escarpment Consortium",
+        "kind": "Automatic",
+        "tags": [
+        ],
+        "cost": {
+            "Megacredits": 6
+        },
+        "requirements": [
+            {
+                "MinProduction": ["Steel", 1]
+            }
+        ],
+        "any_production": {
+            "Steel": -1
+        },
+        "own_production": {
+            "Steel": 1
+        }
+    },
+    {
+        "name": "AI Central",
+        "kind": "Active",
+        "tags": [
+            "Science",
+            "Building"
+        ],
+        "cost": {
+            "Building": 21
+        },
+        "requirements": [
+            {
+                "MinTags": ["Science", 3]
+            }
+        ],
+        "points": {
+            "Immediate": 1
+        },
+        "own_production": {
+            "Energy": -1
+        },
+        "actions": [
+            {
+                "CauseFreeImpact": {
+                    "DrawCard": 2
+                }
+            }
+        ]
+    },
+    {
+        "name": "Gene Repair",
+        "kind": "Automatic",
+        "tags": [
+            "Science"
+        ],
+        "cost": {
+            "Megacredits": 12
+        },
+        "requirements": [
+            {
+                "MinTags": ["Science", 3]
+            }
+        ],
+        "points": {
+            "Immediate": 2
+        },
+        "own_production": {
+            "Megacredits": 2
+        }
+    },
+    {
+        "name": "Energy Tapping",
+        "kind": "Automatic",
+        "tags": [
+            "Power"
+        ],
+        "cost": {
+            "Megacredits": 3
+        },
+        "points": {
+            "Immediate": -1
+        },
+        "any_production": {
+            "Energy": -1
+        },
+        "own_production": {
+            "Energy": 1
+        }
+    },
+    {
+        "name": "Earth Office",
+        "kind": "Automatic",
+        "tags": [
+            "Earth"
+        ],
+        "cost": {
+            "Megacredits": 1
+        },
+        "effects": [
+            {
+                "CardDiscountForTag": ["Earth", 3]
+            }
+        ]
+    },
+    {
+        "name": "Mineral Deposit",
+        "kind": "Event",
+        "tags": [
+            "Event"
+        ],
+        "cost": {
+            "Megacredits": 5
+        },
+        "immediate_impacts": [
+            {
+                "GainResource": ["Steel", 5]
+            }
+        ]
+    },
+    {
+        "name": "Interstellar Colony Ship",
+        "kind": "Event",
+        "tags": [
+            "Earth",
+            "Space",
+            "Event"
+        ],
+        "cost": {
+            "Space": 24
+        },
+        "requirements": [
+            {"MinTags": ["Science", 5]}
+        ],
+        "points": {
+            "Immediate": 4
+        }
+    },
+    {
+        "name": "Titanium Mine",
+        "kind": "Automatic",
+        "tags": [
+            "Building"
+        ],
+        "cost": {
+            "Building": 7
+        },
+        "own_production": {
+            "Titanium": 1
+        }
+    },
+    {
+        "name": "Development Center",
+        "kind": "Active",
+        "tags": [
+            "Science",
+            "Building"
+        ],
+        "cost": {
+            "Building": 11
+        },
+        "actions": [
+            {
+                "SpendResource": [
+                    "Energy",
+                    1,
+                    {
+                        "DrawCard": 1
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Caretaker Contract",
+        "kind": "Active",
+        "tags": [],
+        "cost": {
+            "Megacredits": 3
+        },
+        "requirements": [
+            {
+                "MinTemperature": 0
+            }
+        ],
+        "actions": [
+            {
+                "SpendResource": [
+                    "Heat",
+                    8,
+                    "RaiseTerraformRating"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Investment Loan",
+        "kind": "Event",
+        "tags": [
+            "Earth",
+            "Event"
+        ],
+        "cost": {
+            "Megacredits": 3
+        },
+        "own_production": {
+            "Megacredits": -1
+        },
+        "immediate_impacts": [
+            {
+                "GainResource": ["Megacredits", 10]
+            }
+        ]
+    },
+    {
+        "name": "Acquired Company",
+        "kind": "Automatic",
+        "tags": [
+            "Earth"
+        ],
+        "cost": {
+            "Megacredits": 10
+        },
+        "own_production": {
+            "Megacredits": 3
+        }
     }
 ]

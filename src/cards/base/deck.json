@@ -1449,5 +1449,520 @@
                 "PlaceCity": "RegularCity"
             }
         ]
+    },
+    {
+        "name": "Permafrost Extraction",
+        "kind": "Event",
+        "tags": [
+            "Event"
+        ],
+        "cost": {
+            "Megacredits": 8
+        },
+        "requirements": [
+            {
+                "MinTemperature": -8
+            }
+        ],
+        "immediate_impacts": [
+            {
+                "PlaceOcean": "ReservedForOcean"
+            }
+        ]
+    },
+    {
+        "name": "Magnetic Field Generator",
+        "kind": "Automatic",
+        "tags": [
+            "Building"
+        ],
+        "cost": {
+            "Building": 20
+        },
+        "own_production": {
+            "Energy": -4,
+            "Plants": 2
+        },
+        "immediate_impacts": [
+            "RaiseTerraformRating",
+            "RaiseTerraformRating",
+            "RaiseTerraformRating"
+        ]
+    },
+    {
+        "name": "Wave Power",
+        "kind": "Automatic",
+        "tags": [
+            "Power"
+        ],
+        "cost": {
+            "Megacredits": 8
+        },
+        "requirements": [
+            {
+                "MinOceans": 3
+            }
+        ],
+        "points": {
+            "Immediate": 1
+        },
+        "own_production": {
+            "Energy": 1
+        }
+    },
+    {
+        "name": "GHG Producing Bacteria",
+        "kind": "Active",
+        "tags": [
+            "Science",
+            "Microbe"
+        ],
+        "cost": {
+            "Megacredits": 8
+        },
+        "requirements": [
+            {
+                "MinOxygen": 4
+            }
+        ],
+        "actions": [
+            {
+                "CauseFreeImpact": {
+                    "AddResourceToSameCard": [
+                        "Microbe",
+                        1
+                    ]
+                }
+            },
+            {
+                "SpendSameCardResource": [
+                    "Microbe",
+                    2,
+                    "RaiseTemperature"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Subterranean Reservoir",
+        "kind": "Event",
+        "tags": [
+            "Event"
+        ],
+        "cost": {
+            "Megacredits": 11
+        },
+        "immediate_impacts": [
+            {
+                "PlaceOcean": "ReservedForOcean"
+            }
+        ]
+    },
+    {
+        "name": "Fueled Generators",
+        "kind": "Automatic",
+        "tags": [
+            "Power",
+            "Building"
+        ],
+        "cost": {
+            "Building": 1
+        },
+        "own_production": {
+            "Megacredits": -1,
+            "Energy": 1
+        }
+    },
+    {
+        "name": "Algae",
+        "kind": "Automatic",
+        "tags": [
+            "Plant"
+        ],
+        "cost": {
+            "Megacredits": 10
+        },
+        "requirements": [
+            {
+                "MinOceans": 5
+            }
+        ],
+        "own_production": {
+            "Plants": 2
+        },
+        "immediate_impacts": [
+            {
+                "GainResource": [
+                    "Plants",
+                    1
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Magnetic Field Dome",
+        "kind": "Automatic",
+        "tags": [
+            "Building"
+        ],
+        "cost": {
+            "Building": 5
+        },
+        "own_production": {
+            "Energy": -2,
+            "Plants": 1
+        },
+        "immediate_impacts": [
+            "RaiseTerraformRating"
+        ]
+    },
+    {
+        "name": "Regolith Eaters",
+        "kind": "Active",
+        "tags": [
+            "Science",
+            "Microbe"
+        ],
+        "cost": {
+            "Megacredits": 13
+        },
+        "actions": [
+            {
+                "CauseFreeImpact": {
+                    "AddResourceToSameCard": [
+                        "Microbe",
+                        1
+                    ]
+                }
+            },
+            {
+                "SpendSameCardResource": [
+                    "Microbe",
+                    2,
+                    "RaiseOxygen"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Water Splitting Plant",
+        "kind": "Active",
+        "tags": [
+            "Building"
+        ],
+        "cost": {
+            "Building": 12
+        },
+        "requirements": [
+            {
+                "MinOceans": 2
+            }
+        ],
+        "actions": [
+            {
+                "SpendResource": [
+                    "Energy",
+                    3,
+                    "RaiseOxygen"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Shuttles",
+        "kind": "Automatic",
+        "tags": [
+            "Space"
+        ],
+        "cost": {
+            "Space": 10
+        },
+        "requirements": [
+            {
+                "MinOxygen": 5
+            }
+        ],
+        "points": {
+            "Immediate": 1
+        },
+        "own_production": {
+            "Energy": -1,
+            "Megacredits": 2
+        },
+        "effects": [
+            {
+                "CardDiscountForTag": [
+                    "Space",
+                    2
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Artificial Lake",
+        "kind": "Automatic",
+        "tags": [
+            "Building"
+        ],
+        "cost": {
+            "Building": 15
+        },
+        "requirements": [
+            {
+                "MinTemperature": -6
+            }
+        ],
+        "points": {
+            "Immediate": 1
+        },
+        "immediate_impacts": [
+            {
+                "PlaceOcean": "RegularLand"
+            }
+        ]
+    },
+    {
+        "name": "Plantation",
+        "kind": "Automatic",
+        "tags": [
+            "Plant"
+        ],
+        "cost": {
+            "Megacredits": 15
+        },
+        "requirements": [
+            {
+                "MinTags": ["Science", 2]
+            }
+        ],
+        "immediate_impacts": [
+            {
+                "PlaceGreenery": "RegularLand"
+            }
+        ]
+    },
+    {
+        "name": "Tundra Farming",
+        "kind": "Automatic",
+        "tags": [
+            "Plant"
+        ],
+        "cost": {
+            "Megacredits": 16
+        },
+        "requirements": [
+            {
+                "MinTemperature": -6
+            }
+        ],
+        "points": {
+            "Immediate": 2
+        },
+        "own_production": {
+            "Plants": 1,
+            "Megacredits": 2
+        },
+        "immediate_impacts": [
+            {
+                "GainResource": ["Plants", 1]
+            }
+        ]
+    },
+    {
+        "name": "Farming",
+        "kind": "Automatic",
+        "tags": [
+            "Plant"
+        ],
+        "cost": {
+            "Megacredits": 16
+        },
+        "requirements": [
+            {
+                "MinTemperature": 4
+            }
+        ],
+        "points": {
+            "Immediate": 2
+        },
+        "own_production": {
+            "Megacredits": 2,
+            "Plants": 2
+        },
+        "immediate_impacts": [
+            {
+                "GainResource": ["Plants", 2]
+            }
+        ]
+    },
+    {
+        "name": "Asteroid",
+        "kind": "Event",
+        "tags": [
+            "Space",
+            "Event"
+        ],
+        "cost": {
+            "Space": 14
+        },
+        "immediate_impacts": [
+            "RaiseTemperature",
+            {
+                "GainResource": ["Titanium", 2]
+            },
+            {
+                "DestroyAnyPlants": 3
+            }
+        ]
+    },
+    {
+        "name": "Release Of Inert Gases",
+        "kind": "Event",
+        "tags": [
+            "Event"
+        ],
+        "cost": {
+            "Megacredits": 14
+        },
+        "immediate_impacts": [
+            "RaiseTerraformRating",
+            "RaiseTerraformRating"
+        ]
+    },
+    {
+        "name": "Big Asteroid",
+        "kind": "Event",
+        "tags": [
+            "Space",
+            "Event"
+        ],
+        "cost": {
+            "Space": 27
+        },
+        "immediate_impacts": [
+            "RaiseTemperature",
+            "RaiseTemperature",
+            {
+                "GainResource": ["Titanium", 4]
+            },
+            {
+                "DestroyAnyPlants": 4
+            }
+        ]
+    },
+    {
+        "name": "Comet",
+        "kind": "Event",
+        "tags": [
+            "Space",
+            "Event"
+        ],
+        "cost": {
+            "Space": 21
+        },
+        "immediate_impacts": [
+            "RaiseTemperature",
+            {
+                "PlaceOcean": "ReservedForOcean"
+            },
+            {
+                "DestroyAnyPlants": 3
+            }
+        ]
+    },
+    {
+        "name": "Ganymede Colony",
+        "kind": "Automatic",
+        "tags": [
+            "Jovian",
+            "Space",
+            "City"
+        ],
+        "cost": {
+            "Space": 20
+        },
+        "points": {
+            "PerTag": [1, 1, "Jovian"]
+        },
+        "immediate_impacts": [
+            {
+                "PlaceCity": "GanymedeColony"
+            }
+        ]
+    },
+    {
+        "name": "Methane From Titan",
+        "kind": "Automatic",
+        "tags": [
+            "Jovian",
+            "Space"
+        ],
+        "cost": {
+            "Space": 28
+        },
+        "requirements": [
+            {
+                "MinOxygen": 2
+            }
+        ],
+        "points": {
+            "Immediate": 2
+        },
+        "own_production": {
+            "Heat": 2,
+            "Plants": 2
+        }
+    },
+    {
+        "name": "Adapted Lichen",
+        "kind": "Automatic",
+        "tags": [
+            "Plant"
+        ],
+        "cost": {
+            "Megacredits": 9
+        },
+        "own_production": {
+            "Plants": 1
+        }
+    },
+    {
+        "name": "Phobos Space Haven",
+        "kind": "Automatic",
+        "tags": [
+            "Space",
+            "City"
+        ],
+        "cost": {
+            "Space": 25
+        },
+        "points": {
+            "Immediate": 3
+        },
+        "own_production": {
+            "Titanium": 1
+        },
+        "immediate_impacts": [
+            {
+                "PlaceCity": "PhobosSpaceHaven"
+            }
+        ]
+    },
+    {
+        "name": "Vesta Shipyard",
+        "kind": "Automatic",
+        "tags": [
+            "Jovian",
+            "Space"
+        ],
+        "cost": {
+            "Space": 15
+        },
+        "points": {
+            "Immediate": 1
+        },
+        "own_production": {
+            "Titanium": 1
+        }
     }
 ]
