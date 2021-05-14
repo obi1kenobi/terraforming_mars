@@ -1,9 +1,9 @@
 #![allow(dead_code)]
 
 use serde::{Deserialize, Serialize};
-use std::hash::Hash;
+use std::{collections::BTreeMap, hash::Hash};
 use std::{
-    collections::{HashMap, HashSet},
+    collections::HashSet,
     num::NonZeroUsize,
 };
 
@@ -23,7 +23,7 @@ pub(crate) enum CardTag {
     Event,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialOrd, Ord, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub(crate) enum Resource {
     Megacredits,
     Steel,
@@ -42,7 +42,7 @@ pub(crate) enum CardResource {
     Fighter,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub(crate) enum CardRequirement {
     MaxOxygen(usize),
     MinOxygen(usize),
@@ -76,7 +76,7 @@ pub(crate) enum CardKind {
     Event,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub(crate) enum VictoryPointValue {
     Immediate(isize),
     PerCity(usize),
@@ -145,25 +145,25 @@ pub(crate) enum SpecialTile {
     // TODO: fill me in
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub(crate) enum CardEffect {
     AnyCardDiscount(usize),
     CardDiscountForTag(CardTag, usize),
-    CannotRemoveCardResources(HashSet<CardResource>),
+    CannotRemoveCardResources(Vec<CardResource>),
 
     // gain (card) resource / production, of given quantity, when own/anyone's move has one of the given immediate impacts
-    GainCardResourceForOwnImpact(CardResource, isize, HashSet<ImmediateImpact>),
-    GainResourceForOwnImpact(Resource, isize, HashSet<ImmediateImpact>),
-    GainCardResourceForAnyImpact(CardResource, isize, HashSet<ImmediateImpact>),
-    GainResourceForAnyImpact(Resource, isize, HashSet<ImmediateImpact>),
-    GainProductionForOwnImpact(Resource, isize, HashSet<ImmediateImpact>),
-    GainProductionForAnyImpact(Resource, isize, HashSet<ImmediateImpact>),
+    GainCardResourceForOwnImpact(CardResource, isize, Vec<ImmediateImpact>),
+    GainResourceForOwnImpact(Resource, isize, Vec<ImmediateImpact>),
+    GainCardResourceForAnyImpact(CardResource, isize, Vec<ImmediateImpact>),
+    GainResourceForAnyImpact(Resource, isize, Vec<ImmediateImpact>),
+    GainProductionForOwnImpact(Resource, isize, Vec<ImmediateImpact>),
+    GainProductionForAnyImpact(Resource, isize, Vec<ImmediateImpact>),
 
     // gain production when anyone plays a card with this tag
     GainProductionForAnyTagPlayed(Resource, isize, CardTag),
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub(crate) struct Card {
     name: String,
     kind: CardKind,
@@ -179,12 +179,12 @@ pub(crate) struct Card {
     points: Option<VictoryPointValue>,
 
     #[serde(default)]
-    #[serde(skip_serializing_if = "HashMap::is_empty")]
-    own_production: HashMap<Resource, isize>, // the card player's production change
+    #[serde(skip_serializing_if = "BTreeMap::is_empty")]
+    own_production: BTreeMap<Resource, isize>, // the card player's production change
 
     #[serde(default)]
-    #[serde(skip_serializing_if = "HashMap::is_empty")]
-    any_production: HashMap<Resource, isize>, // any player's change (for stealing production)
+    #[serde(skip_serializing_if = "BTreeMap::is_empty")]
+    any_production: BTreeMap<Resource, isize>, // any player's change (for stealing production)
 
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
@@ -207,8 +207,8 @@ impl Card {
         cost: PaymentCost,
         requirements: Vec<CardRequirement>,
         points: Option<VictoryPointValue>,
-        own_production: HashMap<Resource, isize>,
-        any_production: HashMap<Resource, isize>,
+        own_production: BTreeMap<Resource, isize>,
+        any_production: BTreeMap<Resource, isize>,
         immediate_impacts: Vec<ImmediateImpact>,
         actions: Vec<CardAction>,
         effects: Vec<CardEffect>,
@@ -240,9 +240,10 @@ impl Card {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub(crate) struct PlayerState {
-    resources: HashMap<Resource, usize>,
-    production: HashMap<Resource, isize>,
+    resources: BTreeMap<Resource, usize>,
+    production: BTreeMap<Resource, isize>,
     played_cards: Vec<Card>,
+    tapped_active_cards: HashSet<Card>,
     cards_in_hand: Vec<Card>,
     terraform_rating: usize,
 }
@@ -294,6 +295,9 @@ impl PlayerState {
                 *val = new_val as usize;
             });
         }
+
+        self.resources = new_resources;
+        self.tapped_active_cards.clear();
     }
 }
 
