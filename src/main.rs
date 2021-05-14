@@ -56,7 +56,7 @@ pub(crate) enum CardRequirement {
     MinProduction(Resource, NonZeroUsize),
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub(crate) enum PaymentCost {
     Megacredits(usize),
     Space(usize),
@@ -89,7 +89,7 @@ pub(crate) enum VictoryPointValue {
     FixedPointsIfAnyCardResourcePresent(usize, CardResource),
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub(crate) enum CardAction {
     CauseFreeImpact(ImmediateImpact),
     SpendResource(PaymentCost, ImmediateImpact),
@@ -243,6 +243,8 @@ pub(crate) struct PlayerState {
     resources: HashMap<Resource, usize>,
     production: HashMap<Resource, isize>,
     played_cards: Vec<Card>,
+    cards_in_hand: Vec<Card>,
+    terraform_rating: usize,
 }
 
 impl PlayerState {
@@ -273,13 +275,45 @@ impl PlayerState {
         })
     }
 
-    pub(crate) fn advance_generation() {
-        todo!()
+    pub(crate) fn advance_generation(&mut self) {
+        let mut new_resources = self.resources.clone();
+        
+        // All energy becomes heat.
+        let current_energy = new_resources[&Resource::Energy];
+        new_resources.entry(Resource::Heat).and_modify(|val| { *val += current_energy});
+        new_resources.insert(Resource::Energy, 0);
+
+        // Gain credits equal to the terraform rating.
+        new_resources.entry(Resource::Megacredits).and_modify(|val| *val += self.terraform_rating);
+
+        // Gain resources according to production.
+        for (key, production) in self.production.iter() {
+            new_resources.entry(*key).and_modify(|val| {
+                let new_val = *val as isize + production;
+                assert!(new_val >= 0);
+                *val = new_val as usize;
+            });
+        }
     }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub(crate) struct MarsBoard {}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub(crate) enum TurnAction {
+    PlayStandardProject,
+    PlayCard(Card),
+    PerformAction(CardAction),
+    ClaimMilestone,
+    FundAward,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub(crate) enum PlayerTurn {
+    Play(TurnAction, Option<TurnAction>),
+    Pass,
+}
 
 pub fn main() {}
 
