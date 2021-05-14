@@ -57,14 +57,16 @@ pub(crate) enum CardRequirement {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub(crate) enum ResourceCost {
+pub(crate) enum PaymentCost {
     Megacredits(usize),
     Space(usize),
     Building(usize),
     SpaceOrBuilding(usize),
-    Microbe(usize),
-    Plant(usize),
-    Animal(usize),
+    Steel(usize),
+    Titanium(usize),
+    Plants(usize),
+    Energy(usize),
+    Heat(usize),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -90,7 +92,7 @@ pub(crate) enum VictoryPointValue {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub(crate) enum CardAction {
     CauseFreeImpact(ImmediateImpact),
-    SpendResource(Resource, usize, ImmediateImpact),
+    SpendResource(PaymentCost, ImmediateImpact),
     SpendSameCardResource(CardResource, usize, ImmediateImpact),
     SpendProduction(Resource, usize, ImmediateImpact),
 
@@ -166,7 +168,7 @@ pub(crate) struct Card {
     name: String,
     kind: CardKind,
     tags: Vec<CardTag>,
-    cost: ResourceCost,
+    cost: PaymentCost,
 
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
@@ -202,7 +204,7 @@ impl Card {
         name: String,
         kind: CardKind,
         tags: Vec<CardTag>,
-        cost: ResourceCost,
+        cost: PaymentCost,
         requirements: Vec<CardRequirement>,
         points: Option<VictoryPointValue>,
         own_production: HashMap<Resource, isize>,
@@ -283,7 +285,7 @@ pub fn main() {}
 
 #[cfg(test)]
 mod tests {
-    use crate::{Card, CardKind, CardTag, ResourceCost};
+    use crate::{Card, CardKind, CardTag, PaymentCost};
 
     fn is_card_valid(card: &Card) -> bool {
         let mut is_valid = true;
@@ -305,19 +307,19 @@ mod tests {
         }
 
         match card.cost {
-            ResourceCost::Building(_) => {
+            PaymentCost::Building(_) => {
                 is_valid &= card.tags.contains(&CardTag::Building);
                 is_valid &= !card.tags.contains(&CardTag::Space);
             }
-            ResourceCost::Space(_) => {
+            PaymentCost::Space(_) => {
                 is_valid &= !card.tags.contains(&CardTag::Building);
                 is_valid &= card.tags.contains(&CardTag::Space);
             }
-            ResourceCost::SpaceOrBuilding(_) => {
+            PaymentCost::SpaceOrBuilding(_) => {
                 is_valid &= card.tags.contains(&CardTag::Building);
                 is_valid &= card.tags.contains(&CardTag::Space);
             }
-            ResourceCost::Megacredits(_) | _ => {
+            PaymentCost::Megacredits(_) | _ => {
                 is_valid &= !card.tags.contains(&CardTag::Building);
                 is_valid &= !card.tags.contains(&CardTag::Space);
             }

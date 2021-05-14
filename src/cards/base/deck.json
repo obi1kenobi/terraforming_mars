@@ -87,8 +87,9 @@
         "actions": [
             {
                 "SpendResource": [
-                    "Energy",
-                    1,
+                    {
+                        "Energy": 1
+                    },
                     {
                         "GainResourcePerCityOnMars": [
                             "Megacredits",
@@ -616,8 +617,9 @@
         "actions": [
             {
                 "SpendResource": [
-                    "Plants",
-                    1,
+                    {
+                        "Plants": 1
+                    },
                     {
                         "GainResource": [
                             "Megacredits",
@@ -628,8 +630,9 @@
             },
             {
                 "SpendResource": [
-                    "Steel",
-                    1,
+                    {
+                        "Steel": 1
+                    },
                     {
                         "GainResource": [
                             "Megacredits",
@@ -1661,8 +1664,9 @@
         "actions": [
             {
                 "SpendResource": [
-                    "Energy",
-                    3,
+                    {
+                        "Energy": 3
+                    },
                     "RaiseOxygen"
                 ]
             }
@@ -1732,7 +1736,10 @@
         },
         "requirements": [
             {
-                "MinTags": ["Science", 2]
+                "MinTags": [
+                    "Science",
+                    2
+                ]
             }
         ],
         "immediate_impacts": [
@@ -1764,7 +1771,10 @@
         },
         "immediate_impacts": [
             {
-                "GainResource": ["Plants", 1]
+                "GainResource": [
+                    "Plants",
+                    1
+                ]
             }
         ]
     },
@@ -1791,7 +1801,10 @@
         },
         "immediate_impacts": [
             {
-                "GainResource": ["Plants", 2]
+                "GainResource": [
+                    "Plants",
+                    2
+                ]
             }
         ]
     },
@@ -1808,7 +1821,10 @@
         "immediate_impacts": [
             "RaiseTemperature",
             {
-                "GainResource": ["Titanium", 2]
+                "GainResource": [
+                    "Titanium",
+                    2
+                ]
             },
             {
                 "DestroyAnyPlants": 3
@@ -1843,7 +1859,10 @@
             "RaiseTemperature",
             "RaiseTemperature",
             {
-                "GainResource": ["Titanium", 4]
+                "GainResource": [
+                    "Titanium",
+                    4
+                ]
             },
             {
                 "DestroyAnyPlants": 4
@@ -1882,7 +1901,11 @@
             "Space": 20
         },
         "points": {
-            "PerTag": [1, 1, "Jovian"]
+            "PerTag": [
+                1,
+                1,
+                "Jovian"
+            ]
         },
         "immediate_impacts": [
             {

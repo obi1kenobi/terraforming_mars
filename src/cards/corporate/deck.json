@@ -32,8 +32,9 @@
         "actions": [
             {
                 "SpendResource": [
-                    "Steel",
-                    1,
+                    {
+                        "Steel": 1
+                    },
                     {
                         "GainResource": [
                             "Megacredits",
@@ -271,14 +272,16 @@
     {
         "name": "Great Escarpment Consortium",
         "kind": "Automatic",
-        "tags": [
-        ],
+        "tags": [],
         "cost": {
             "Megacredits": 6
         },
         "requirements": [
             {
-                "MinProduction": ["Steel", 1]
+                "MinProduction": [
+                    "Steel",
+                    1
+                ]
             }
         ],
         "any_production": {
@@ -300,7 +303,10 @@
         },
         "requirements": [
             {
-                "MinTags": ["Science", 3]
+                "MinTags": [
+                    "Science",
+                    3
+                ]
             }
         ],
         "points": {
@@ -328,7 +334,10 @@
         },
         "requirements": [
             {
-                "MinTags": ["Science", 3]
+                "MinTags": [
+                    "Science",
+                    3
+                ]
             }
         ],
         "points": {
@@ -368,7 +377,10 @@
         },
         "effects": [
             {
-                "CardDiscountForTag": ["Earth", 3]
+                "CardDiscountForTag": [
+                    "Earth",
+                    3
+                ]
             }
         ]
     },
@@ -383,7 +395,10 @@
         },
         "immediate_impacts": [
             {
-                "GainResource": ["Steel", 5]
+                "GainResource": [
+                    "Steel",
+                    5
+                ]
             }
         ]
     },
@@ -399,7 +414,12 @@
             "Space": 24
         },
         "requirements": [
-            {"MinTags": ["Science", 5]}
+            {
+                "MinTags": [
+                    "Science",
+                    5
+                ]
+            }
         ],
         "points": {
             "Immediate": 4
@@ -431,8 +451,9 @@
         "actions": [
             {
                 "SpendResource": [
-                    "Energy",
-                    1,
+                    {
+                        "Energy": 1
+                    },
                     {
                         "DrawCard": 1
                     }
@@ -455,8 +476,9 @@
         "actions": [
             {
                 "SpendResource": [
-                    "Heat",
-                    8,
+                    {
+                        "Heat": 8
+                    },
                     "RaiseTerraformRating"
                 ]
             }
@@ -477,7 +499,10 @@
         },
         "immediate_impacts": [
             {
-                "GainResource": ["Megacredits", 10]
+                "GainResource": [
+                    "Megacredits",
+                    10
+                ]
             }
         ]
     },
