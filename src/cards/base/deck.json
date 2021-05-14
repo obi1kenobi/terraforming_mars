@@ -1987,5 +1987,403 @@
         "own_production": {
             "Titanium": 1
         }
+    },
+    {
+        "name": "Solar Wind Power",
+        "kind": "Automatic",
+        "tags": [
+            "Science",
+            "Space",
+            "Power"
+        ],
+        "cost": {
+            "Space": 11
+        },
+        "own_production": {
+            "Energy": 1
+        },
+        "immediate_impacts": [
+            {
+                "GainResource": [
+                    "Titanium",
+                    2
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Domed Crater",
+        "kind": "Automatic",
+        "tags": [
+            "City",
+            "Building"
+        ],
+        "cost": {
+            "Building": 24
+        },
+        "requirements": [
+            {
+                "MaxOxygen": 7
+            }
+        ],
+        "points": {
+            "Immediate": 1
+        },
+        "own_production": {
+            "Energy": -1,
+            "Megacredits": 3
+        },
+        "immediate_impacts": [
+            {
+                "GainResource": [
+                    "Plants",
+                    3
+                ]
+            },
+            {
+                "PlaceCity": "RegularCity"
+            }
+        ]
+    },
+    {
+        "name": "Strip Mine",
+        "kind": "Automatic",
+        "tags": [
+            "Building"
+        ],
+        "cost": {
+            "Building": 25
+        },
+        "own_production": {
+            "Energy": -2,
+            "Steel": 2,
+            "Titanium": 1
+        },
+        "immediate_impacts": [
+            "RaiseOxygen",
+            "RaiseOxygen"
+        ]
+    },
+    {
+        "name": "Import of Advanced GHG",
+        "kind": "Event",
+        "tags": [
+            "Earth",
+            "Space",
+            "Event"
+        ],
+        "cost": {
+            "Space": 9
+        },
+        "own_production": {
+            "Heat": 2
+        }
+    },
+    {
+        "name": "Grass",
+        "kind": "Automatic",
+        "tags": [
+            "Plant"
+        ],
+        "cost": {
+            "Megacredits": 11
+        },
+        "requirements": [
+            {
+                "MinTemperature": -16
+            }
+        ],
+        "own_production": {
+            "Plants": 1
+        },
+        "immediate_impacts": [
+            {
+                "GainResource": [
+                    "Plants",
+                    3
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Cloud Seeding",
+        "kind": "Automatic",
+        "tags": [],
+        "cost": {
+            "Megacredits": 11
+        },
+        "requirements": [
+            {
+                "MinOceans": 3
+            }
+        ],
+        "any_production": {
+            "Heat": -1
+        },
+        "own_production": {
+            "Megacredits": -1,
+            "Plants": 2
+        }
+    },
+    {
+        "name": "Archaebacteria",
+        "kind": "Automatic",
+        "tags": [
+            "Microbe"
+        ],
+        "cost": {
+            "Megacredits": 6
+        },
+        "requirements": [
+            {
+                "MaxTemperature": -18
+            }
+        ],
+        "own_production": {
+            "Plants": 1
+        }
+    },
+    {
+        "name": "Lunar Beam",
+        "kind": "Automatic",
+        "tags": [
+            "Earth",
+            "Power"
+        ],
+        "cost": {
+            "Megacredits": 13
+        },
+        "own_production": {
+            "Megacredits": -2,
+            "Heat": 2,
+            "Energy": 2
+        }
+    },
+    {
+        "name": "Underground Detonations",
+        "kind": "Active",
+        "tags": [
+            "Building"
+        ],
+        "cost": {
+            "Building": 6
+        },
+        "actions": [
+            {
+                "SpendResource": [
+                    {
+                        "Megacredits": 10
+                    },
+                    {
+                        "GainProduction": [
+                            "Heat",
+                            2
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Space Mirrors",
+        "kind": "Active",
+        "tags": [
+            "Power",
+            "Space"
+        ],
+        "cost": {
+            "Space": 3
+        },
+        "actions": [
+            {
+                "SpendResource": [
+                    {
+                        "Megacredits": 7
+                    },
+                    {
+                        "GainProduction": [
+                            "Energy",
+                            1
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Soil Factory",
+        "kind": "Automatic",
+        "tags": [
+            "Building"
+        ],
+        "cost": {
+            "Building": 9
+        },
+        "points": {
+            "Immediate": 1
+        },
+        "own_production": {
+            "Energy": -1,
+            "Plants": 1
+        }
+    },
+    {
+        "name": "Asteroid Mining",
+        "kind": "Automatic",
+        "tags": [
+            "Jovian",
+            "Space"
+        ],
+        "cost": {
+            "Space": 30
+        },
+        "points": {
+            "Immediate": 2
+        },
+        "own_production": {
+            "Titanium": 2
+        }
+    },
+    {
+        "name": "Ice Asteroid",
+        "kind": "Event",
+        "tags": [
+            "Space",
+            "Event"
+        ],
+        "cost": {
+            "Space": 23
+        },
+        "immediate_impacts": [
+            {
+                "PlaceOcean": "ReservedForOcean"
+            },
+            {
+                "PlaceOcean": "ReservedForOcean"
+            }
+        ]
+    },
+    {
+        "name": "Lichen",
+        "kind": "Automatic",
+        "tags": [
+            "Plant"
+        ],
+        "cost": {
+            "Megacredits": 7
+        },
+        "requirements": [
+            {
+                "MinTemperature": -24
+            }
+        ],
+        "own_production": {
+            "Plants": 1
+        }
+    },
+    {
+        "name": "Ice Cap Melting",
+        "kind": "Event",
+        "tags": [
+            "Event"
+        ],
+        "cost": {
+            "Megacredits": 5
+        },
+        "requirements": [
+            {
+                "MinTemperature": 2
+            }
+        ],
+        "immediate_impacts": [
+            {
+                "PlaceOcean": "ReservedForOcean"
+            }
+        ]
+    },
+    {
+        "name": "Kelp Farming",
+        "kind": "Automatic",
+        "tags": [
+            "Plant"
+        ],
+        "cost": {
+            "Megacredits": 17
+        },
+        "requirements": [
+            {
+                "MinOceans": 6
+            }
+        ],
+        "points": {
+            "Immediate": 1
+        },
+        "own_production": {
+            "Megacredits": 2,
+            "Plants": 3
+        },
+        "immediate_impacts": [
+            {
+                "GainResource": [
+                    "Plants",
+                    2
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Soletta",
+        "kind": "Automatic",
+        "tags": [
+            "Space"
+        ],
+        "cost": {
+            "Space": 35
+        },
+        "own_production": {
+            "Heat": 7
+        }
+    },
+    {
+        "name": "Colonizer Training Camp",
+        "kind": "Automatic",
+        "tags": [
+            "Jovian",
+            "Building"
+        ],
+        "cost": {
+            "Building": 8
+        },
+        "requirements": [
+            {
+                "MaxOxygen": 5
+            }
+        ],
+        "points": {
+            "Immediate": 2
+        }
+    },
+    {
+        "name": "Imported GHG",
+        "kind": "Event",
+        "tags": [
+            "Earth",
+            "Space",
+            "Event"
+        ],
+        "cost": {
+            "Space": 7
+        },
+        "own_production": {
+            "Heat": 1
+        },
+        "immediate_impacts": [
+            {
+                "GainResource": [
+                    "Heat",
+                    3
+                ]
+            }
+        ]
     }
 ]

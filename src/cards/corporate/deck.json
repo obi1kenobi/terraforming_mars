@@ -518,5 +518,197 @@
         "own_production": {
             "Megacredits": 3
         }
+    },
+    {
+        "name": "Security Fleet",
+        "kind": "Active",
+        "tags": [
+            "Space"
+        ],
+        "cost": {
+            "Space": 12
+        },
+        "points": {
+            "PerCardResource": [
+                1,
+                1,
+                "Fighter"
+            ]
+        },
+        "actions": [
+            {
+                "SpendResource": [
+                    {
+                        "Titanium": 1
+                    },
+                    {
+                        "AddResourceToSameCard": [
+                            "Fighter",
+                            1
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Quantum Extractor",
+        "kind": "Automatic",
+        "tags": [
+            "Science",
+            "Power"
+        ],
+        "cost": {
+            "Megacredits": 13
+        },
+        "requirements": [
+            {
+                "MinTags": [
+                    "Science",
+                    4
+                ]
+            }
+        ],
+        "own_production": {
+            "Energy": 4
+        },
+        "effects": [
+            {
+                "CardDiscountForTag": [
+                    "Space",
+                    2
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Tardigrades",
+        "kind": "Active",
+        "tags": [
+            "Microbe"
+        ],
+        "cost": {
+            "Megacredits": 4
+        },
+        "points": {
+            "PerCardResource": [
+                1,
+                4,
+                "Microbe"
+            ]
+        },
+        "actions": [
+            {
+                "CauseFreeImpact": {
+                    "AddResourceToSameCard": [
+                        "Microbe",
+                        1
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "name": "Building Industries",
+        "kind": "Automatic",
+        "tags": [
+            "Building"
+        ],
+        "cost": {
+            "Building": 6
+        },
+        "own_production": {
+            "Energy": -1,
+            "Steel": 2
+        }
+    },
+    {
+        "name": "Io Mining Industries",
+        "kind": "Automatic",
+        "tags": [
+            "Jovian",
+            "Space"
+        ],
+        "cost": {
+            "Space": 41
+        },
+        "points": {
+            "PerTag": [
+                1,
+                1,
+                "Jovian"
+            ]
+        },
+        "own_production": {
+            "Titanium": 2,
+            "Megacredits": 2
+        }
+    },
+    {
+        "name": "Bribed Committee",
+        "kind": "Event",
+        "tags": [
+            "Earth",
+            "Event"
+        ],
+        "cost": {
+            "Megacredits": 7
+        },
+        "points": {
+            "Immediate": -2
+        },
+        "immediate_impacts": [
+            "RaiseTerraformRating",
+            "RaiseTerraformRating"
+        ]
+    },
+    {
+        "name": "Mass Converter",
+        "kind": "Automatic",
+        "tags": [
+            "Science",
+            "Power"
+        ],
+        "cost": {
+            "Megacredits": 8
+        },
+        "requirements": [
+            {
+                "MinTags": [
+                    "Science",
+                    5
+                ]
+            }
+        ],
+        "own_production": {
+            "Energy": 6
+        },
+        "effects": [
+            {
+                "CardDiscountForTag": [
+                    "Space",
+                    2
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Research",
+        "kind": "Automatic",
+        "tags": [
+            "Science",
+            "Science"
+        ],
+        "cost": {
+            "Megacredits": 11
+        },
+        "points": {
+            "Immediate": 1
+        },
+        "immediate_impacts": [
+            {
+                "DrawCard": 2
+            }
+        ]
     }
 ]

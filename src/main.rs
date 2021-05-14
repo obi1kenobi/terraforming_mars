@@ -2,10 +2,7 @@
 
 use serde::{Deserialize, Serialize};
 use std::{collections::BTreeMap, hash::Hash};
-use std::{
-    collections::HashSet,
-    num::NonZeroUsize,
-};
+use std::{collections::HashSet, num::NonZeroUsize};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub(crate) enum CardTag {
@@ -118,6 +115,7 @@ pub(crate) enum ImmediateImpact {
     AddResourceToAnyCard(CardResource, usize), // any card, including the one that caused the impact
     GainResource(Resource, usize),
     GainResourcePerCityOnMars(Resource, usize),
+    GainProduction(Resource, usize),
     DestroyOwnPlants(usize),
     DestroyAnyPlants(usize),
     PlaceSpecialTile(SpecialTile),
@@ -278,14 +276,18 @@ impl PlayerState {
 
     pub(crate) fn advance_generation(&mut self) {
         let mut new_resources = self.resources.clone();
-        
+
         // All energy becomes heat.
         let current_energy = new_resources[&Resource::Energy];
-        new_resources.entry(Resource::Heat).and_modify(|val| { *val += current_energy});
+        new_resources
+            .entry(Resource::Heat)
+            .and_modify(|val| *val += current_energy);
         new_resources.insert(Resource::Energy, 0);
 
         // Gain credits equal to the terraform rating.
-        new_resources.entry(Resource::Megacredits).and_modify(|val| *val += self.terraform_rating);
+        new_resources
+            .entry(Resource::Megacredits)
+            .and_modify(|val| *val += self.terraform_rating);
 
         // Gain resources according to production.
         for (key, production) in self.production.iter() {
@@ -332,7 +334,7 @@ pub fn main() {}
 
 #[cfg(test)]
 mod tests {
-    use crate::{Card, CardKind, CardTag, PaymentCost};
+    use crate::*;
 
     fn is_card_valid(card: &Card) -> bool {
         let mut is_valid = true;
@@ -351,6 +353,15 @@ mod tests {
 
         if card.tags.contains(&CardTag::Event) {
             is_valid &= card.kind == CardKind::Event;
+        }
+
+        if card.tags.contains(&CardTag::City) {
+            is_valid &= card
+                .immediate_impacts
+                .iter()
+                .filter(|x| matches!(x, ImmediateImpact::PlaceCity(_)))
+                .count()
+                > 0
         }
 
         match card.cost {
