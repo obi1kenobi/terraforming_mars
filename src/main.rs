@@ -76,7 +76,9 @@ pub(crate) enum CardKind {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub(crate) enum VictoryPointValue {
     Immediate(isize),
-    PerCity(usize),
+
+    PerCity(usize),     // N points per 1 city
+    PerNCities(usize),  // 1 point per N cities
 
     // how many points, per how many tags/resources, of which kind
     PerTag(usize, usize, CardTag),
@@ -103,6 +105,7 @@ pub(crate) enum ImmediateImpact {
     RaiseTemperature,
     RaiseOxygen,
     RaiseTerraformRating,
+    GainTerraformRatingPerOwnTag(CardTag, usize),
 
     // None in the option means "placed anywhere"
     PlaceOcean(Option<LocationKind>),
@@ -116,6 +119,14 @@ pub(crate) enum ImmediateImpact {
     GainResource(Resource, usize),
     GainResourcePerCityOnMars(Resource, usize),
     GainProduction(Resource, usize),
+    GainProductionPerCity(Resource, usize),
+    GainProductionPerCityOnMars(Resource, usize),
+
+    // gain production: (per card tag, count, gain resource production, of magnitude)
+    GainProductionPerOwnTag(CardTag, usize, Resource, usize),
+    GainProductionPerOpponentTag(CardTag, usize, Resource, usize),
+    GainProductionPerAnyTag(CardTag, usize, Resource, usize),  // own or opponent-played tag
+
     DestroyOwnPlants(usize),
     DestroyAnyPlants(usize),
     PlaceSpecialTile(SpecialTile),
@@ -131,25 +142,40 @@ pub(crate) enum LocationKind {
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub(crate) enum CityKind {
     RegularCity,
-    NoctisCity,
-    LavaTunnelCity,
-    PhobosSpaceHaven,
-    GanymedeColony,
-    UrbanizedArea,
+    Capital,           // regular city + scores 1VP per adjacent ocean
+    NoctisCity,        // reserved place on map
+    PhobosSpaceHaven,  // reserved place on map
+    GanymedeColony,    // reserved place on map
+    LavaTunnelCity,    // one of several possible places on map
+    UrbanizedArea,     // placed between two cities
+    ResearchOutpost,   // placed next to no other tile
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub(crate) enum SpecialTile {
-    // TODO: fill me in
+    NuclearZone,
+    RestrictedArea,
+    LavaFlows,
+    CommercialDistrict,  // scores 1VP per adjacent city tile
+    NaturalPreserve,     // placed next to no other tile
+    IndustrialCenter,    // placed adjacent to a city tile
+    MoholeArea,          // placed on area reserved for ocean
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub(crate) enum CardEffect {
     AnyCardDiscount(usize),
+
+    // pay less up front for playing a card with that tag
     CardDiscountForTag(CardTag, usize),
+
+    // get Megacredits back after putting a tag into play (must be able to afford the inital price)
+    RebateAfterPlayingCardTag(CardTag, usize),
+
     CannotRemoveCardResources(Vec<CardResource>),
 
-    // gain (card) resource / production, of given quantity, when own/anyone's move has one of the given immediate impacts
+    // gain (card) resource / production, of given quantity,
+    // when own/anyone's move has one of the given immediate impacts
     GainCardResourceForOwnImpact(CardResource, isize, Vec<ImmediateImpact>),
     GainResourceForOwnImpact(Resource, isize, Vec<ImmediateImpact>),
     GainCardResourceForAnyImpact(CardResource, isize, Vec<ImmediateImpact>),
@@ -255,6 +281,7 @@ impl PlayerState {
     }
 
     pub(crate) fn active_tag_count(&self, tag_kind: CardTag) -> usize {
+        assert_ne!(tag_kind, CardTag::Event);
         self.get_played_non_event_tags()
             .filter(|&tag| tag == tag_kind)
             .count()
@@ -262,6 +289,7 @@ impl PlayerState {
 
     pub(crate) fn active_tag_count_for_action(&self, tag_kind: CardTag) -> usize {
         // Wild tags only count for the purposes of performing actions.
+        assert_ne!(tag_kind, CardTag::Event);
         self.get_played_non_event_tags()
             .filter(|&tag| tag == tag_kind || tag == CardTag::Wild)
             .count()
