@@ -1032,9 +1032,14 @@
         },
         "effects": [
             {
-                "RebateAfterPlayingCardTag": [
+                "OnOwnTagPlayed": [
                     "Event",
-                    3
+                    {
+                        "GainResource": [
+                            "Megacredits",
+                            3
+                        ]
+                    }
                 ]
             }
         ]

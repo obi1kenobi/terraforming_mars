@@ -168,9 +168,6 @@ pub enum CardEffect {
     // pay less up front for playing a card with that tag
     CardDiscountForTag(CardTag, usize),
 
-    // get Megacredits back after putting a tag into play (must be able to afford the inital price)
-    RebateAfterPlayingCardTag(CardTag, usize),
-
     CannotRemoveThisCardResource(CardResource),
     CannotRemoveAnyCardResources(Vec<CardResource>),
 
@@ -181,6 +178,7 @@ pub enum CardEffect {
 
     // whenever the player with this effect does the thing
     OnOwnPlacedGreenery(ImmediateImpact),
+    OnOwnTagPlayed(CardTag, ImmediateImpact),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
