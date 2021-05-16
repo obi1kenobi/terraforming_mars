@@ -1090,5 +1090,60 @@
                 ]
             }
         ]
+    },
+    {
+        "name": "Advanced Alloys",
+        "kind": "Automatic",
+        "tags": [
+            "Science"
+        ],
+        "cost": {
+            "Megacredits": 9
+        },
+        "effects": [
+            {
+                "IncreasedMetalsValue": 1
+            }
+        ]
+    },
+    {
+        "name": "Standard Technology",
+        "kind": "Automatic",
+        "tags": [
+            "Science"
+        ],
+        "cost": {
+            "Megacredits": 6
+        },
+        "effects": [
+            {
+                "RebateForStandardProjects": 1
+            }
+        ]
+    },
+    {
+        "name": "Mining Area",
+        "kind": "Automatic",
+        "tags": [
+            "Building"
+        ],
+        "cost": {
+            "Building": 4
+        },
+        "immediate_impacts": [
+            {
+                "PlaceSpecialTile": [
+                    "MiningArea",
+                    [
+                        "LandTile",
+                        "AdjacentToOwnedTile",
+                        "OnSteelOrTitaniumPlacementBonus"
+                    ]
+                ]
+            },
+            {
+                "GainMiningProductionMatchingPlacementBonus": 1
+            }
+        ]
     }
 ]

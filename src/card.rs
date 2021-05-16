@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use std::num::NonZeroUsize;
 use std::{collections::BTreeMap, hash::Hash};
 
 use crate::resource::{CardResource, PaymentCost, Resource};
@@ -28,10 +27,9 @@ pub enum CardRequirement {
     MinTemperature(isize),
     MaxOceans(usize),
     MinOceans(usize),
-    MinTags(CardTag, NonZeroUsize),
-    MinCities(NonZeroUsize),
-    MinGreeneries(NonZeroUsize),
-    MinProduction(Resource, NonZeroUsize),
+    MinTags(CardTag, usize),
+    MinOwnedGreeneries(usize),
+    MinProduction(Resource, usize),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -73,15 +71,23 @@ pub enum ImmediateImpact {
     PlaceCity(CityKind, Vec<LocationRestriction>),
 
     DrawCard(usize),
+
     AddResourceToSameCard(CardResource, usize), // card that caused the impact
     AddResourceToAnotherCard(CardResource, usize), // *not* the card that caused the impact
     AddResourceToAnyCard(CardResource, usize), // any card, including the one that caused the impact
+    AddResourceToPlayedCard(CardResource, usize),  // used when impact is triggered from an effect
+
     GainResource(Resource, usize),
     GainResourcePerCity(Resource, usize),
     GainResourcePerCityOnMars(Resource, usize),
     GainProduction(Resource, usize),
     GainProductionPerCity(Resource, usize),
     GainProductionPerCityOnMars(Resource, usize),
+
+    // used for cards like Mining Area and Mining Rights:
+    // they must be placed on tiles with a steel or titanium placement bonus,
+    // and the production matching the placement bonus goes up by the specified amount
+    GainMiningProductionMatchingPlacementBonus(usize),
 
     // gain production: (per card tag, count, gain resource production, of magnitude)
     GainProductionPerOwnTag(CardTag, usize, Resource, usize),
@@ -90,7 +96,9 @@ pub enum ImmediateImpact {
 
     DestroyOwnPlants(usize),
     DestroyAnyPlants(usize),
+
     PlaceSpecialTile(SpecialTile, Vec<LocationRestriction>),
+
     CopyProductionOfCard(CardTag),
 }
 
@@ -98,11 +106,17 @@ pub enum ImmediateImpact {
 pub enum LocationRestriction {
     LandTile,
     ReservedForOcean,
+
+    // the former is *required*, the latter is "if able" but ignored if unable
+    AdjacentToOwnedTile,
     AdjacentToOwnedTileIfAble, // some greenery placements don't have this! e.g. Mangrove
+
     NotNextToAnyOtherTile,
     NotNextToACity,
     NextToACity,
     NextToAtLeastTwoCities,
+    NextToAGreenery,
+    OnSteelOrTitaniumPlacementBonus,
     AtSpecialLocation(SpecialLocation),
 }
 
@@ -141,7 +155,6 @@ pub enum CityKind {
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum SpecialTile {
-    Capital,
     NuclearZone,
     RestrictedArea,
     LavaFlows,
@@ -149,6 +162,9 @@ pub enum SpecialTile {
     NaturalPreserve,    // placed next to no other tile
     IndustrialCenter,   // placed adjacent to a city tile
     MoholeArea,         // placed on area reserved for ocean
+    EcologicalZone,     // placed adjacent to any greenery tile
+    MiningRights,       // placed on steel/titanium placement bonus
+    MiningArea,         // placed on steel/titanium placement bonus, adjacent to owned tile
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -173,6 +189,16 @@ pub enum CardEffect {
     // pay less up front for playing a card with that tag
     CardDiscountForTag(CardTag, usize),
 
+    // steel and titanium gain additional value when converted to megacredits
+    IncreasedMetalsValue(usize),
+
+    // after playing a standard project (except selling patents), get megacredits back
+    RebateForStandardProjects(usize),
+
+    // oxygen / oceans / temperature requirements are +/- the given magnitude,
+    // per player's choice for each
+    GlobalRequirementsTolerance(usize),
+
     CannotRemoveThisCardResource(CardResource),
     CannotRemoveAnyCardResources(Vec<CardResource>),
 
@@ -184,6 +210,7 @@ pub enum CardEffect {
     // whenever the player with this effect does the thing
     OnOwnPlacedGreenery(ImmediateImpact),
     OnOwnTagPlayed(CardTag, ImmediateImpact),
+    OnOwnTagCombinationPlayed(Vec<CardTag>, Vec<ImmediateImpact>),  // all the tags are on the same card
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]

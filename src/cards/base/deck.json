@@ -3120,5 +3120,225 @@
                 ]
             }
         ]
+    },
+    {
+        "name": "Decomposers",
+        "kind": "Automatic",
+        "tags": [
+            "Microbe"
+        ],
+        "cost": {
+            "Megacredits": 5
+        },
+        "requirements": [
+            {
+                "MinOxygen": 3
+            }
+        ],
+        "points": {
+            "PerCardResource": [
+                1,
+                3,
+                "Microbe"
+            ]
+        },
+        "effects": [
+            {
+                "OnOwnTagPlayed": [
+                    "Animal",
+                    {
+                        "AddResourceToSameCard": [
+                            "Microbe",
+                            1
+                        ]
+                    }
+                ]
+            },
+            {
+                "OnOwnTagPlayed": [
+                    "Plant",
+                    {
+                        "AddResourceToSameCard": [
+                            "Microbe",
+                            1
+                        ]
+                    }
+                ]
+            },
+            {
+                "OnOwnTagPlayed": [
+                    "Microbe",
+                    {
+                        "AddResourceToSameCard": [
+                            "Microbe",
+                            1
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Optimal Aerobraking",
+        "kind": "Automatic",
+        "tags": [
+            "Space"
+        ],
+        "cost": {
+            "Space": 7
+        },
+        "effects": [
+            {
+                "OnOwnTagCombinationPlayed": [
+                    [
+                        "Space",
+                        "Event"
+                    ],
+                    [
+                        {
+                            "GainResource": [
+                                "Megacredits",
+                                3
+                            ]
+                        },
+                        {
+                            "GainResource": [
+                                "Heat",
+                                3
+                            ]
+                        }
+                    ]
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Ecological Zone",
+        "kind": "Automatic",
+        "tags": [
+            "Animal",
+            "Plant"
+        ],
+        "cost": {
+            "Megacredits": 12
+        },
+        "requirements": [
+            {
+                "MinOwnedGreeneries": 1
+            }
+        ],
+        "points": {
+            "PerCardResource": [
+                1,
+                2,
+                "Animal"
+            ]
+        },
+        "immediate_impacts": [
+            {
+                "PlaceSpecialTile": [
+                    "EcologicalZone",
+                    [
+                        "LandTile",
+                        "NextToAGreenery"
+                    ]
+                ]
+            }
+        ],
+        "effects": [
+            {
+                "OnOwnTagPlayed": [
+                    "Animal",
+                    {
+                        "AddResourceToSameCard": [
+                            "Animal",
+                            1
+                        ]
+                    }
+                ]
+            },
+            {
+                "OnOwnTagPlayed": [
+                    "Plant",
+                    {
+                        "AddResourceToSameCard": [
+                            "Animal",
+                            1
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Pets",
+        "kind": "Automatic",
+        "tags": [
+            "Earth",
+            "Animal"
+        ],
+        "cost": {
+            "Megacredits": 10
+        },
+        "points": {
+            "PerCardResource": [
+                1, 2, "Animal"
+            ]
+        },
+        "effects": [
+            {
+                "CannotRemoveThisCardResource": "Animal"
+            },
+            {
+                "OnAnyPlacedCity": {
+                    "AddResourceToSameCard": [
+                        "Animal",
+                        1
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "name": "Adaptation Technology",
+        "kind": "Automatic",
+        "tags": [
+            "Science"
+        ],
+        "cost": {
+            "Megacredits": 12
+        },
+        "points": {
+            "Immediate": 1
+        },
+        "effects": [
+            {
+                "GlobalRequirementsTolerance": 2
+            }
+        ]
+    },
+    {
+        "name": "Mining Rights",
+        "kind": "Automatic",
+        "tags": [
+            "Building"
+        ],
+        "cost": {
+            "Building": 9
+        },
+        "immediate_impacts": [
+            {
+                "PlaceSpecialTile": [
+                    "MiningRights",
+                    [
+                        "LandTile",
+                        "OnSteelOrTitaniumPlacementBonus"
+                    ]
+                ]
+            },
+            {
+                "GainMiningProductionMatchingPlacementBonus": 1
+            }
+        ]
     }
 ]
