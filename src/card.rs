@@ -177,21 +177,10 @@ pub enum CardEffect {
     // whenever any player does the thing
     OnAnyPlacedOcean(ImmediateImpact),
     OnAnyPlacedCity(ImmediateImpact),
+    OnAnyTagPlayed(CardTag, ImmediateImpact),
 
     // whenever the player with this effect does the thing
     OnOwnPlacedGreenery(ImmediateImpact),
-
-    // gain (card) resource / production, of given quantity,
-    // when own/anyone's move has one of the given immediate impacts
-    GainCardResourceForOwnImpact(CardResource, isize, Vec<ImmediateImpact>),
-    GainResourceForOwnImpact(Resource, isize, Vec<ImmediateImpact>),
-    GainCardResourceForAnyImpact(CardResource, isize, Vec<ImmediateImpact>),
-    GainResourceForAnyImpact(Resource, isize, Vec<ImmediateImpact>),
-    GainProductionForOwnImpact(Resource, isize, Vec<ImmediateImpact>),
-    GainProductionForAnyImpact(Resource, isize, Vec<ImmediateImpact>),
-
-    // gain production when anyone plays a card with this tag
-    GainProductionForAnyTagPlayed(Resource, isize, CardTag),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
