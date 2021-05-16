@@ -3036,5 +3036,89 @@
                 }
             }
         ]
+    },
+    {
+        "name": "Ironworks",
+        "kind": "Active",
+        "tags": [
+            "Building"
+        ],
+        "cost": {
+            "Building": 11
+        },
+        "actions": [
+            {
+                "SpendResource": [
+                    {
+                        "Energy": 4
+                    },
+                    [
+                        {
+                            "GainResource": [
+                                "Steel",
+                                1
+                            ]
+                        },
+                        "RaiseOxygen"
+                    ]
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Ore Processor",
+        "kind": "Active",
+        "tags": [
+            "Building"
+        ],
+        "cost": {
+            "Building": 13
+        },
+        "actions": [
+            {
+                "SpendResource": [
+                    {
+                        "Energy": 4
+                    },
+                    [
+                        {
+                            "GainResource": [
+                                "Titanium",
+                                1
+                            ]
+                        },
+                        "RaiseOxygen"
+                    ]
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Steelworks",
+        "kind": "Active",
+        "tags": [
+            "Building"
+        ],
+        "cost": {
+            "Building": 15
+        },
+        "actions": [
+            {
+                "SpendResource": [
+                    {
+                        "Energy": 4
+                    },
+                    [
+                        {
+                            "GainResource": [
+                                "Steel",
+                                2
+                            ]
+                        },
+                        "RaiseOxygen"
+                    ]
+                ]
+            }
+        ]
     }
 ]
