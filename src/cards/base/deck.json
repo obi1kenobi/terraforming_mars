@@ -68,7 +68,9 @@
         },
         "immediate_impacts": [
             {
-                "PlaceOcean": "ReservedForOcean"
+                "PlaceOcean": [
+                    "ReservedForOcean"
+                ]
             },
             {
                 "DrawCard": 1
@@ -276,7 +278,13 @@
         },
         "immediate_impacts": [
             {
-                "PlaceCity": "RegularCity"
+                "PlaceCity": [
+                    "RegularCity",
+                    [
+                        "LandTile",
+                        "NotNextToACity"
+                    ]
+                ]
             }
         ]
     },
@@ -314,15 +322,12 @@
         ],
         "effects": [
             {
-                "GainCardResourceForOwnImpact": [
-                    "Animal",
-                    1,
-                    [
-                        {
-                            "PlaceGreenery": null
-                        }
+                "OnOwnPlacedGreenery": {
+                    "AddResourceToSameCard": [
+                        "Animal",
+                        1
                     ]
-                ]
+                }
             }
         ]
     },
@@ -400,7 +405,13 @@
         },
         "immediate_impacts": [
             {
-                "PlaceCity": "RegularCity"
+                "PlaceCity": [
+                    "RegularCity",
+                    [
+                        "LandTile",
+                        "NotNextToACity"
+                    ]
+                ]
             }
         ]
     },
@@ -460,7 +471,9 @@
         },
         "immediate_impacts": [
             {
-                "PlaceGreenery": "ReservedForOcean"
+                "PlaceGreenery": [
+                    "ReservedForOcean"
+                ]
             }
         ]
     },
@@ -512,7 +525,13 @@
         },
         "immediate_impacts": [
             {
-                "PlaceCity": "UrbanizedArea"
+                "PlaceCity": [
+                    "UrbanizedArea",
+                    [
+                        "LandTile",
+                        "NextToAtLeastTwoCities"
+                    ]
+                ]
             }
         ]
     },
@@ -698,20 +717,23 @@
         },
         "immediate_impacts": [
             {
-                "PlaceCity": "RegularCity"
+                "PlaceCity": [
+                    "RegularCity",
+                    [
+                        "LandTile",
+                        "NotNextToACity"
+                    ]
+                ]
             }
         ],
         "effects": [
             {
-                "GainProductionForAnyImpact": [
-                    "Megacredits",
-                    1,
-                    [
-                        {
-                            "PlaceCity": null
-                        }
+                "OnAnyPlacedCity": {
+                    "GainProduction": [
+                        "Megacredits",
+                        1
                     ]
-                ]
+                }
             }
         ]
     },
@@ -808,7 +830,14 @@
         },
         "immediate_impacts": [
             {
-                "PlaceCity": "NoctisCity"
+                "PlaceCity": [
+                    "NoctisCity",
+                    [
+                        {
+                            "AtSpecialLocation": "NoctisCity"
+                        }
+                    ]
+                ]
             }
         ]
     },
@@ -927,7 +956,9 @@
             },
             "RaiseOxygen",
             {
-                "PlaceOcean": "ReservedForOcean"
+                "PlaceOcean": [
+                    "ReservedForOcean"
+                ]
             }
         ]
     },
@@ -955,15 +986,12 @@
         ],
         "effects": [
             {
-                "GainResourceForAnyImpact": [
-                    "Plants",
-                    2,
-                    [
-                        {
-                            "PlaceOcean": null
-                        }
+                "OnAnyPlacedOcean": {
+                    "GainResource": [
+                        "Plants",
+                        2
                     ]
-                ]
+                }
             }
         ]
     },
@@ -981,15 +1009,12 @@
         },
         "effects": [
             {
-                "GainResourceForAnyImpact": [
-                    "Megacredits",
-                    2,
-                    [
-                        {
-                            "PlaceCity": null
-                        }
+                "OnAnyPlacedCity": {
+                    "GainResource": [
+                        "Megacredits",
+                        2
                     ]
-                ]
+                }
             }
         ]
     },
@@ -1158,10 +1183,14 @@
         },
         "immediate_impacts": [
             {
-                "PlaceOcean": "ReservedForOcean"
+                "PlaceOcean": [
+                    "ReservedForOcean"
+                ]
             },
             {
-                "PlaceOcean": "ReservedForOcean"
+                "PlaceOcean": [
+                    "ReservedForOcean"
+                ]
             }
         ]
     },
@@ -1178,7 +1207,9 @@
         },
         "immediate_impacts": [
             {
-                "PlaceOcean": "ReservedForOcean"
+                "PlaceOcean": [
+                    "ReservedForOcean"
+                ]
             }
         ]
     },
@@ -1320,10 +1351,14 @@
             "RaiseTemperature",
             "RaiseTemperature",
             {
-                "PlaceOcean": "ReservedForOcean"
+                "PlaceOcean": [
+                    "ReservedForOcean"
+                ]
             },
             {
-                "PlaceOcean": "ReservedForOcean"
+                "PlaceOcean": [
+                    "ReservedForOcean"
+                ]
             },
             {
                 "DestroyAnyPlants": 6
@@ -1449,7 +1484,13 @@
                 ]
             },
             {
-                "PlaceCity": "RegularCity"
+                "PlaceCity": [
+                    "RegularCity",
+                    [
+                        "LandTile",
+                        "NotNextToACity"
+                    ]
+                ]
             }
         ]
     },
@@ -1469,7 +1510,9 @@
         ],
         "immediate_impacts": [
             {
-                "PlaceOcean": "ReservedForOcean"
+                "PlaceOcean": [
+                    "ReservedForOcean"
+                ]
             }
         ]
     },
@@ -1557,7 +1600,9 @@
         },
         "immediate_impacts": [
             {
-                "PlaceOcean": "ReservedForOcean"
+                "PlaceOcean": [
+                    "ReservedForOcean"
+                ]
             }
         ]
     },
@@ -1721,7 +1766,9 @@
         },
         "immediate_impacts": [
             {
-                "PlaceOcean": "RegularLand"
+                "PlaceOcean": [
+                    "LandTile"
+                ]
             }
         ]
     },
@@ -1744,7 +1791,9 @@
         ],
         "immediate_impacts": [
             {
-                "PlaceGreenery": "RegularLand"
+                "PlaceGreenery": [
+                    "LandTile"
+                ]
             }
         ]
     },
@@ -1882,7 +1931,9 @@
         "immediate_impacts": [
             "RaiseTemperature",
             {
-                "PlaceOcean": "ReservedForOcean"
+                "PlaceOcean": [
+                    "ReservedForOcean"
+                ]
             },
             {
                 "DestroyAnyPlants": 3
@@ -1909,7 +1960,14 @@
         },
         "immediate_impacts": [
             {
-                "PlaceCity": "GanymedeColony"
+                "PlaceCity": [
+                    "GanymedeColony",
+                    [
+                        {
+                            "AtSpecialLocation": "GanymedeColony"
+                        }
+                    ]
+                ]
             }
         ]
     },
@@ -1967,7 +2025,14 @@
         },
         "immediate_impacts": [
             {
-                "PlaceCity": "PhobosSpaceHaven"
+                "PlaceCity": [
+                    "PhobosSpaceHaven",
+                    [
+                        {
+                            "AtSpecialLocation": "PhobosSpaceHaven"
+                        }
+                    ]
+                ]
             }
         ]
     },
@@ -2041,7 +2106,13 @@
                 ]
             },
             {
-                "PlaceCity": "RegularCity"
+                "PlaceCity": [
+                    "RegularCity",
+                    [
+                        "LandTile",
+                        "NotNextToACity"
+                    ]
+                ]
             }
         ]
     },
@@ -2256,10 +2327,14 @@
         },
         "immediate_impacts": [
             {
-                "PlaceOcean": "ReservedForOcean"
+                "PlaceOcean": [
+                    "ReservedForOcean"
+                ]
             },
             {
-                "PlaceOcean": "ReservedForOcean"
+                "PlaceOcean": [
+                    "ReservedForOcean"
+                ]
             }
         ]
     },
@@ -2297,7 +2372,9 @@
         ],
         "immediate_impacts": [
             {
-                "PlaceOcean": "ReservedForOcean"
+                "PlaceOcean": [
+                    "ReservedForOcean"
+                ]
             }
         ]
     },
@@ -2399,7 +2476,13 @@
         },
         "immediate_impacts": [
             {
-                "PlaceCity": "ResearchOutpost"
+                "PlaceCity": [
+                    "ResearchOutpost",
+                    [
+                        "LandTile",
+                        "NotNextToAnyOtherTile"
+                    ]
+                ]
             }
         ],
         "effects": [
@@ -2422,7 +2505,12 @@
         },
         "immediate_impacts": [
             {
-                "PlaceSpecialTile": "MoholeArea"
+                "PlaceSpecialTile": [
+                    "MoholeArea",
+                    [
+                        "ReservedForOcean"
+                    ]
+                ]
             }
         ]
     },
@@ -2449,7 +2537,13 @@
         },
         "immediate_impacts": [
             {
-                "PlaceSpecialTile": "NaturalPreserve"
+                "PlaceSpecialTile": [
+                    "NaturalPreserve",
+                    [
+                        "LandTile",
+                        "NotNextToAnyOtherTile"
+                    ]
+                ]
             }
         ]
     },
@@ -2466,7 +2560,14 @@
             "RaiseTemperature",
             "RaiseTemperature",
             {
-                "PlaceSpecialTile": "LavaFlows"
+                "PlaceSpecialTile": [
+                    "LavaFlows",
+                    [
+                        {
+                            "AtSpecialLocation": "VolcanicArea"
+                        }
+                    ]
+                ]
             }
         ]
     },
@@ -2491,7 +2592,13 @@
         },
         "immediate_impacts": [
             {
-                "PlaceCity": "Capital"
+                "PlaceCity": [
+                    "Capital",
+                    [
+                        "LandTile",
+                        "NotNextToACity"
+                    ]
+                ]
             }
         ]
     },
@@ -2511,7 +2618,12 @@
             "RaiseTemperature",
             "RaiseTemperature",
             {
-                "PlaceSpecialTile": "NuclearZone"
+                "PlaceSpecialTile": [
+                    "NuclearZone",
+                    [
+                        "LandTile"
+                    ]
+                ]
             }
         ]
     },
@@ -2679,7 +2791,9 @@
                         "Building": 8
                     },
                     {
-                        "PlaceOcean": "ReservedForOcean"
+                        "PlaceOcean": [
+                            "ReservedForOcean"
+                        ]
                     }
                 ]
             }
@@ -2709,7 +2823,9 @@
                         "Space": 12
                     },
                     {
-                        "PlaceOcean": "ReservedForOcean"
+                        "PlaceOcean": [
+                            "ReservedForOcean"
+                        ]
                     }
                 ]
             }
@@ -2734,7 +2850,9 @@
         },
         "immediate_impacts": [
             {
-                "PlaceGreenery": "ReservedForOcean"
+                "PlaceGreenery": [
+                    "ReservedForOcean"
+                ]
             }
         ]
     },

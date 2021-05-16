@@ -126,7 +126,13 @@
         },
         "immediate_impacts": [
             {
-                "PlaceCity": "RegularCity"
+                "PlaceCity": [
+                    "RegularCity",
+                    [
+                        "LandTile",
+                        "NotNextToACity"
+                    ]
+                ]
             }
         ]
     },
@@ -766,7 +772,13 @@
         },
         "immediate_impacts": [
             {
-                "PlaceSpecialTile": "IndustrialCenter"
+                "PlaceSpecialTile": [
+                    "IndustrialCenter",
+                    [
+                        "LandTile",
+                        "NextToACity"
+                    ]
+                ]
             }
         ],
         "actions": [
@@ -800,7 +812,12 @@
         },
         "immediate_impacts": [
             {
-                "PlaceSpecialTile": "CommercialDistrict"
+                "PlaceSpecialTile": [
+                    "CommercialDistrict",
+                    [
+                        "LandTile"
+                    ]
+                ]
             }
         ]
     },
@@ -815,7 +832,12 @@
         },
         "immediate_impacts": [
             {
-                "PlaceSpecialTile": "RestrictedArea"
+                "PlaceSpecialTile": [
+                    "RestrictedArea",
+                    [
+                        "LandTile"
+                    ]
+                ]
             }
         ],
         "actions": [

@@ -62,10 +62,9 @@ pub enum ImmediateImpact {
     // gain count of TR per number of tags
     GainTerraformRatingPerOwnTag(usize, CardTag, usize),
 
-    // None in the option means "placed anywhere"
-    PlaceOcean(Option<LocationKind>),
-    PlaceGreenery(Option<LocationKind>),
-    PlaceCity(Option<CityKind>),
+    PlaceOcean(Vec<LocationRestriction>),
+    PlaceGreenery(Vec<LocationRestriction>),
+    PlaceCity(CityKind, Vec<LocationRestriction>),
 
     DrawCard(usize),
     AddResourceToSameCard(CardResource, usize), // card that caused the impact
@@ -85,14 +84,42 @@ pub enum ImmediateImpact {
 
     DestroyOwnPlants(usize),
     DestroyAnyPlants(usize),
-    PlaceSpecialTile(SpecialTile),
+    PlaceSpecialTile(SpecialTile, Vec<LocationRestriction>),
     CopyProductionOfCard(CardTag),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub enum LocationKind {
-    RegularLand,
+pub enum LocationRestriction {
+    LandTile,
     ReservedForOcean,
+    AdjacentToOwnedTileIfAble,  // some greenery placements don't have this! e.g. Mangrove
+    NotNextToAnyOtherTile,
+    NotNextToACity,
+    NextToACity,
+    NextToAtLeastTwoCities,
+    AtSpecialLocation(SpecialLocation),
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum SpecialLocation {
+    // N.B.: Not all of these locations exist on all game maps.
+    //       The base game ships with only the Tharsis map.
+
+    PhobosSpaceHaven,
+    GanymedeColony,
+
+    // On the Tharsis map, Noctis City has a reserved named tile.
+    // On Elysium and Hellas, Noctis City is played as a regular city.
+    // https://boardgamegeek.com/thread/2134024/article/31112841#31112841
+    NoctisCity,
+
+    // Volcanic areas are different on different maps.
+    // On the Tharsis map, those are: Tharsis Tholus, Ascraeus Mons, Pavonis Mons, and Arsia Mons.
+    // On the Elysium map, those are: Hecates Tholus, Elysium Mons, Olympus Mons, and Arsia Mons.
+    // On the Hellas map, there are no volcanoes, so the placement restriction becomes
+    // "anywhere except otherwise restricted areas, as if a standard tile of its kind."
+    // https://boardgamegeek.com/thread/2096004/article/30497241#30497241
+    VolcanicArea,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -109,6 +136,7 @@ pub enum CityKind {
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum SpecialTile {
+    Capital,
     NuclearZone,
     RestrictedArea,
     LavaFlows,
@@ -145,6 +173,13 @@ pub enum CardEffect {
 
     CannotRemoveThisCardResource(CardResource),
     CannotRemoveAnyCardResources(Vec<CardResource>),
+
+    // whenever any player does the thing
+    OnAnyPlacedOcean(ImmediateImpact),
+    OnAnyPlacedCity(ImmediateImpact),
+
+    // whenever the player with this effect does the thing
+    OnOwnPlacedGreenery(ImmediateImpact),
 
     // gain (card) resource / production, of given quantity,
     // when own/anyone's move has one of the given immediate impacts
@@ -279,7 +314,7 @@ mod tests {
             is_valid &= card
                 .immediate_impacts
                 .iter()
-                .filter(|x| matches!(x, ImmediateImpact::PlaceCity(_)))
+                .filter(|x| matches!(x, ImmediateImpact::PlaceCity(_, _)))
                 .count()
                 > 0
         }
