@@ -58,7 +58,9 @@ pub enum ImmediateImpact {
     RaiseTemperature,
     RaiseOxygen,
     RaiseTerraformRating,
-    GainTerraformRatingPerOwnTag(CardTag, usize),
+
+    // gain count of TR per number of tags
+    GainTerraformRatingPerOwnTag(usize, CardTag, usize),
 
     // None in the option means "placed anywhere"
     PlaceOcean(Option<LocationKind>),
@@ -70,6 +72,7 @@ pub enum ImmediateImpact {
     AddResourceToAnotherCard(CardResource, usize), // *not* the card that caused the impact
     AddResourceToAnyCard(CardResource, usize), // any card, including the one that caused the impact
     GainResource(Resource, usize),
+    GainResourcePerCity(Resource, usize),
     GainResourcePerCityOnMars(Resource, usize),
     GainProduction(Resource, usize),
     GainProductionPerCity(Resource, usize),
@@ -140,7 +143,8 @@ pub enum CardEffect {
     // get Megacredits back after putting a tag into play (must be able to afford the inital price)
     RebateAfterPlayingCardTag(CardTag, usize),
 
-    CannotRemoveCardResources(Vec<CardResource>),
+    CannotRemoveThisCardResource(CardResource),
+    CannotRemoveAnyCardResources(Vec<CardResource>),
 
     // gain (card) resource / production, of given quantity,
     // when own/anyone's move has one of the given immediate impacts

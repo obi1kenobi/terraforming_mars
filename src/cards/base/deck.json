@@ -2385,5 +2385,423 @@
                 ]
             }
         ]
+    },
+    {
+        "name": "Research Outpost",
+        "kind": "Automatic",
+        "tags": [
+            "Science",
+            "City",
+            "Building"
+        ],
+        "cost": {
+            "Building": 18
+        },
+        "immediate_impacts": [
+            {
+                "PlaceCity": "ResearchOutpost"
+            }
+        ],
+        "effects": [
+            {
+                "AnyCardDiscount": 1
+            }
+        ]
+    },
+    {
+        "name": "Mohole Area",
+        "kind": "Automatic",
+        "tags": [
+            "Building"
+        ],
+        "cost": {
+            "Building": 20
+        },
+        "own_production": {
+            "Heat": 4
+        },
+        "immediate_impacts": [
+            {
+                "PlaceSpecialTile": "MoholeArea"
+            }
+        ]
+    },
+    {
+        "name": "Natural Preserve",
+        "kind": "Automatic",
+        "tags": [
+            "Science",
+            "Building"
+        ],
+        "cost": {
+            "Building": 9
+        },
+        "requirements": [
+            {
+                "MaxOxygen": 4
+            }
+        ],
+        "points": {
+            "Immediate": 1
+        },
+        "own_production": {
+            "Megacredits": 1
+        },
+        "immediate_impacts": [
+            {
+                "PlaceSpecialTile": "NaturalPreserve"
+            }
+        ]
+    },
+    {
+        "name": "Lava Flows",
+        "kind": "Event",
+        "tags": [
+            "Event"
+        ],
+        "cost": {
+            "Megacredits": 18
+        },
+        "immediate_impacts": [
+            "RaiseTemperature",
+            "RaiseTemperature",
+            {
+                "PlaceSpecialTile": "LavaFlows"
+            }
+        ]
+    },
+    {
+        "name": "Capital",
+        "kind": "Automatic",
+        "tags": [
+            "City",
+            "Building"
+        ],
+        "cost": {
+            "Building": 26
+        },
+        "requirements": [
+            {
+                "MinOceans": 4
+            }
+        ],
+        "own_production": {
+            "Energy": -2,
+            "Megacredits": 5
+        },
+        "immediate_impacts": [
+            {
+                "PlaceCity": "Capital"
+            }
+        ]
+    },
+    {
+        "name": "Nuclear Zone",
+        "kind": "Automatic",
+        "tags": [
+            "Earth"
+        ],
+        "cost": {
+            "Megacredits": 10
+        },
+        "points": {
+            "Immediate": -2
+        },
+        "immediate_impacts": [
+            "RaiseTemperature",
+            "RaiseTemperature",
+            {
+                "PlaceSpecialTile": "NuclearZone"
+            }
+        ]
+    },
+    {
+        "name": "Insects",
+        "kind": "Automatic",
+        "tags": [
+            "Microbe"
+        ],
+        "cost": {
+            "Megacredits": 9
+        },
+        "requirements": [
+            {
+                "MinOxygen": 6
+            }
+        ],
+        "immediate_impacts": [
+            {
+                "GainProductionPerOwnTag": [
+                    "Plant",
+                    1,
+                    "Plants",
+                    1
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Worms",
+        "kind": "Automatic",
+        "tags": [
+            "Microbe"
+        ],
+        "cost": {
+            "Megacredits": 9
+        },
+        "requirements": [
+            {
+                "MinOxygen": 4
+            }
+        ],
+        "immediate_impacts": [
+            {
+                "GainProductionPerOwnTag": [
+                    "Microbe",
+                    2,
+                    "Plants",
+                    1
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Power Grid",
+        "kind": "Automatic",
+        "tags": [
+            "Power"
+        ],
+        "cost": {
+            "Megacredits": 18
+        },
+        "immediate_impacts": [
+            {
+                "GainProductionPerOwnTag": [
+                    "Power",
+                    1,
+                    "Energy",
+                    1
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Zeppelins",
+        "kind": "Automatic",
+        "tags": [],
+        "cost": {
+            "Megacredits": 13
+        },
+        "requirements": [
+            {
+                "MinOxygen": 5
+            }
+        ],
+        "points": {
+            "Immediate": 1
+        },
+        "immediate_impacts": [
+            {
+                "GainProductionPerCityOnMars": [
+                    "Megacredits",
+                    1
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Energy Saving",
+        "kind": "Automatic",
+        "tags": [
+            "Power"
+        ],
+        "cost": {
+            "Megacredits": 15
+        },
+        "immediate_impacts": [
+            {
+                "GainProductionPerCity": [
+                    "Energy",
+                    1
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Greenhouses",
+        "kind": "Automatic",
+        "tags": [
+            "Plant",
+            "Building"
+        ],
+        "cost": {
+            "Building": 6
+        },
+        "immediate_impacts": [
+            {
+                "GainResourcePerCity": [
+                    "Plants",
+                    1
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Immigration Shuttles",
+        "kind": "Automatic",
+        "tags": [
+            "Earth",
+            "Space"
+        ],
+        "cost": {
+            "Space": 31
+        },
+        "points": {
+            "PerNCities": 3
+        },
+        "own_production": {
+            "Megacredits": 5
+        }
+    },
+    {
+        "name": "Aquifer Pumping",
+        "kind": "Active",
+        "tags": [
+            "Building"
+        ],
+        "cost": {
+            "Building": 18
+        },
+        "actions": [
+            {
+                "SpendResource": [
+                    {
+                        "Building": 8
+                    },
+                    {
+                        "PlaceOcean": "ReservedForOcean"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Water Import From Europa",
+        "kind": "Active",
+        "tags": [
+            "Jovian",
+            "Space"
+        ],
+        "cost": {
+            "Space": 25
+        },
+        "points": {
+            "PerTag": [
+                1,
+                1,
+                "Jovian"
+            ]
+        },
+        "actions": [
+            {
+                "SpendResource": [
+                    {
+                        "Space": 12
+                    },
+                    {
+                        "PlaceOcean": "ReservedForOcean"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Mangrove",
+        "kind": "Automatic",
+        "tags": [
+            "Plant"
+        ],
+        "cost": {
+            "Megacredits": 12
+        },
+        "requirements": [
+            {
+                "MinTemperature": 4
+            }
+        ],
+        "points": {
+            "Immediate": 1
+        },
+        "immediate_impacts": [
+            {
+                "PlaceGreenery": "ReservedForOcean"
+            }
+        ]
+    },
+    {
+        "name": "Imported Nitrogen",
+        "kind": "Event",
+        "tags": [
+            "Earth",
+            "Space",
+            "Event"
+        ],
+        "cost": {
+            "Space": 23
+        },
+        "immediate_impacts": [
+            "RaiseTerraformRating",
+            {
+                "GainResource": [
+                    "Plants",
+                    4
+                ]
+            },
+            {
+                "AddResourceToAnotherCard": [
+                    "Microbe",
+                    3
+                ]
+            },
+            {
+                "AddResourceToAnotherCard": [
+                    "Animal",
+                    3
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Extreme-cold Fungus",
+        "kind": "Active",
+        "tags": [
+            "Microbe"
+        ],
+        "cost": {
+            "Megacredits": 13
+        },
+        "requirements": [
+            {
+                "MaxTemperature": -10
+            }
+        ],
+        "actions": [
+            {
+                "CauseFreeImpact": {
+                    "GainResource": [
+                        "Plants",
+                        1
+                    ]
+                }
+            },
+            {
+                "CauseFreeImpact": {
+                    "AddResourceToAnotherCard": [
+                        "Microbe",
+                        2
+                    ]
+                }
+            }
+        ]
     }
 ]

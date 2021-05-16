@@ -710,5 +710,344 @@
                 "DrawCard": 2
             }
         ]
+    },
+    {
+        "name": "Anti-Gravity Technology",
+        "kind": "Automatic",
+        "tags": [
+            "Science"
+        ],
+        "cost": {
+            "Megacredits": 14
+        },
+        "requirements": [
+            {
+                "MinTags": [
+                    "Science",
+                    7
+                ]
+            }
+        ],
+        "points": {
+            "Immediate": 3
+        },
+        "effects": [
+            {
+                "AnyCardDiscount": 2
+            }
+        ]
+    },
+    {
+        "name": "Earth Catapult",
+        "kind": "Automatic",
+        "tags": [
+            "Earth"
+        ],
+        "cost": {
+            "Megacredits": 23
+        },
+        "points": {
+            "Immediate": 2
+        },
+        "effects": [
+            {
+                "AnyCardDiscount": 2
+            }
+        ]
+    },
+    {
+        "name": "Industrial Center",
+        "kind": "Active",
+        "tags": [
+            "Building"
+        ],
+        "cost": {
+            "Building": 4
+        },
+        "immediate_impacts": [
+            {
+                "PlaceSpecialTile": "IndustrialCenter"
+            }
+        ],
+        "actions": [
+            {
+                "SpendResource": [
+                    {
+                        "Megacredits": 7
+                    },
+                    {
+                        "GainProduction": [
+                            "Steel",
+                            1
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Commercial District",
+        "kind": "Automatic",
+        "tags": [
+            "Building"
+        ],
+        "cost": {
+            "Building": 16
+        },
+        "own_production": {
+            "Energy": -1,
+            "Megacredits": 4
+        },
+        "immediate_impacts": [
+            {
+                "PlaceSpecialTile": "CommercialDistrict"
+            }
+        ]
+    },
+    {
+        "name": "Restricted Area",
+        "kind": "Active",
+        "tags": [
+            "Science"
+        ],
+        "cost": {
+            "Megacredits": 11
+        },
+        "immediate_impacts": [
+            {
+                "PlaceSpecialTile": "RestrictedArea"
+            }
+        ],
+        "actions": [
+            {
+                "SpendResource": [
+                    {
+                        "Megacredits": 2
+                    },
+                    {
+                        "DrawCard": 1
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Miranda Resort",
+        "kind": "Automatic",
+        "tags": [
+            "Jovian",
+            "Space"
+        ],
+        "cost": {
+            "Space": 12
+        },
+        "points": {
+            "Immediate": 1
+        },
+        "immediate_impacts": [
+            {
+                "GainProductionPerOwnTag": [
+                    "Earth",
+                    1,
+                    "Megacredits",
+                    1
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Cartel",
+        "kind": "Automatic",
+        "tags": [
+            "Earth"
+        ],
+        "cost": {
+            "Megacredits": 8
+        },
+        "immediate_impacts": [
+            {
+                "GainProductionPerOwnTag": [
+                    "Earth",
+                    1,
+                    "Megacredits",
+                    1
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Medical Lab",
+        "kind": "Automatic",
+        "tags": [
+            "Science",
+            "Building"
+        ],
+        "cost": {
+            "Building": 13
+        },
+        "points": {
+            "Immediate": 1
+        },
+        "immediate_impacts": [
+            {
+                "GainProductionPerOwnTag": [
+                    "Building",
+                    2,
+                    "Megacredits",
+                    1
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Toll Station",
+        "kind": "Automatic",
+        "tags": [
+            "Space"
+        ],
+        "cost": {
+            "Space": 12
+        },
+        "immediate_impacts": [
+            {
+                "GainProductionPerOpponentTag": [
+                    "Space",
+                    1,
+                    "Megacredits",
+                    1
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Satellites",
+        "kind": "Automatic",
+        "tags": [
+            "Space"
+        ],
+        "cost": {
+            "Space": 10
+        },
+        "immediate_impacts": [
+            {
+                "GainProductionPerOwnTag": [
+                    "Space",
+                    1,
+                    "Megacredits",
+                    1
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Media Archives",
+        "kind": "Automatic",
+        "tags": [
+            "Earth"
+        ],
+        "cost": {
+            "Megacredits": 8
+        },
+        "immediate_impacts": [
+            {
+                "GainProductionPerAnyTag": [
+                    "Event",
+                    1,
+                    "Megacredits",
+                    1
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Terraforming Ganymede",
+        "kind": "Automatic",
+        "tags": [
+            "Jovian",
+            "Space"
+        ],
+        "cost": {
+            "Space": 33
+        },
+        "points": {
+            "Immediate": 2
+        },
+        "immediate_impacts": [
+            {
+                "GainTerraformRatingPerOwnTag": [
+                    1,
+                    "Jovian",
+                    1
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Protected Habitats",
+        "kind": "Automatic",
+        "tags": [],
+        "cost": {
+            "Megacredits": 5
+        },
+        "effects": [
+            {
+                "CannotRemoveAnyCardResources": [
+                    "Plant",
+                    "Animal",
+                    "Microbe"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Media Group",
+        "kind": "Automatic",
+        "tags": [
+            "Earth"
+        ],
+        "cost": {
+            "Megacredits": 6
+        },
+        "effects": [
+            {
+                "RebateAfterPlayingCardTag": [
+                    "Event",
+                    3
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Physics Complex",
+        "kind": "Active",
+        "tags": [
+            "Science",
+            "Building"
+        ],
+        "cost": {
+            "Building": 12
+        },
+        "points": {
+            "PerCardResource": [
+                2,
+                1,
+                "Science"
+            ]
+        },
+        "actions": [
+            {
+                "SpendResource": [
+                    {
+                        "Energy": 6
+                    },
+                    {
+                        "AddResourceToSameCard": [
+                            "Science",
+                            1
+                        ]
+                    }
+                ]
+            }
+        ]
     }
 ]
