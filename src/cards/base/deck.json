@@ -92,12 +92,14 @@
                     {
                         "Energy": 1
                     },
-                    {
-                        "GainResourcePerCityOnMars": [
-                            "Megacredits",
-                            1
-                        ]
-                    }
+                    [
+                        {
+                            "GainResourcePerCityOnMars": [
+                                "Megacredits",
+                                1
+                            ]
+                        }
+                    ]
                 ]
             }
         ]
@@ -639,12 +641,14 @@
                     {
                         "Plants": 1
                     },
-                    {
-                        "GainResource": [
-                            "Megacredits",
-                            7
-                        ]
-                    }
+                    [
+                        {
+                            "GainResource": [
+                                "Megacredits",
+                                7
+                            ]
+                        }
+                    ]
                 ]
             },
             {
@@ -652,12 +656,14 @@
                     {
                         "Steel": 1
                     },
-                    {
-                        "GainResource": [
-                            "Megacredits",
-                            7
-                        ]
-                    }
+                    [
+                        {
+                            "GainResource": [
+                                "Megacredits",
+                                7
+                            ]
+                        }
+                    ]
                 ]
             }
         ]
@@ -751,7 +757,9 @@
                 "SpendProduction": [
                     "Energy",
                     1,
-                    "RaiseTerraformRating"
+                    [
+                        "RaiseTerraformRating"
+                    ]
                 ]
             }
         ]
@@ -1712,7 +1720,9 @@
                     {
                         "Energy": 3
                     },
-                    "RaiseOxygen"
+                    [
+                        "RaiseOxygen"
+                    ]
                 ]
             }
         ]
@@ -2245,12 +2255,14 @@
                     {
                         "Megacredits": 10
                     },
-                    {
-                        "GainProduction": [
-                            "Heat",
-                            2
-                        ]
-                    }
+                    [
+                        {
+                            "GainProduction": [
+                                "Heat",
+                                2
+                            ]
+                        }
+                    ]
                 ]
             }
         ]
@@ -2271,12 +2283,14 @@
                     {
                         "Megacredits": 7
                     },
-                    {
-                        "GainProduction": [
-                            "Energy",
-                            1
-                        ]
-                    }
+                    [
+                        {
+                            "GainProduction": [
+                                "Energy",
+                                1
+                            ]
+                        }
+                    ]
                 ]
             }
         ]
@@ -2790,11 +2804,13 @@
                     {
                         "Building": 8
                     },
-                    {
-                        "PlaceOcean": [
-                            "ReservedForOcean"
-                        ]
-                    }
+                    [
+                        {
+                            "PlaceOcean": [
+                                "ReservedForOcean"
+                            ]
+                        }
+                    ]
                 ]
             }
         ]
@@ -2822,11 +2838,13 @@
                     {
                         "Space": 12
                     },
-                    {
-                        "PlaceOcean": [
-                            "ReservedForOcean"
-                        ]
-                    }
+                    [
+                        {
+                            "PlaceOcean": [
+                                "ReservedForOcean"
+                            ]
+                        }
+                    ]
                 ]
             }
         ]
@@ -2917,6 +2935,103 @@
                     "AddResourceToAnotherCard": [
                         "Microbe",
                         2
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "name": "Ants",
+        "kind": "Active",
+        "tags": [
+            "Microbe"
+        ],
+        "cost": {
+            "Megacredits": 9
+        },
+        "requirements": [
+            {
+                "MinOxygen": 4
+            }
+        ],
+        "points": {
+            "PerCardResource": [
+                1,
+                2,
+                "Microbe"
+            ]
+        },
+        "actions": [
+            {
+                "TakeAnyCardResource": [
+                    "Microbe",
+                    1,
+                    {
+                        "AddResourceToSameCard": [
+                            "Microbe",
+                            1
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Predators",
+        "kind": "Active",
+        "tags": [
+            "Animal"
+        ],
+        "cost": {
+            "Megacredits": 14
+        },
+        "requirements": [
+            {
+                "MinOxygen": 11
+            }
+        ],
+        "points": {
+            "PerCardResource": [
+                1,
+                1,
+                "Animal"
+            ]
+        },
+        "actions": [
+            {
+                "TakeAnyCardResource": [
+                    "Animal",
+                    1,
+                    {
+                        "AddResourceToSameCard": [
+                            "Animal",
+                            1
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Symbiotic Fungus",
+        "kind": "Active",
+        "tags": [
+            "Microbe"
+        ],
+        "cost": {
+            "Megacredits": 4
+        },
+        "requirements": [
+            {
+                "MinTemperature": -14
+            }
+        ],
+        "actions": [
+            {
+                "CauseFreeImpact": {
+                    "AddResourceToAnotherCard": [
+                        "Microbe",
+                        1
                     ]
                 }
             }

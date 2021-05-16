@@ -44,9 +44,15 @@ pub enum CardKind {
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum CardAction {
     CauseFreeImpact(ImmediateImpact),
-    SpendResource(PaymentCost, ImmediateImpact),
+    SpendResource(PaymentCost, Vec<ImmediateImpact>),
+    SpendProduction(Resource, usize, Vec<ImmediateImpact>),
+
+    // spend a card resource of the same card that has this action
     SpendSameCardResource(CardResource, usize, ImmediateImpact),
-    SpendProduction(Resource, usize, ImmediateImpact),
+
+    // Take a card resource from any card having any of the matching resource.
+    // This is "take" not "spend" because you can take resources from opponents' cards too.
+    TakeAnyCardResource(CardResource, usize, ImmediateImpact),
 
     // pay resource in given quantity, then draw and discard a card from the main deck;
     // if the card contains the specified tag, cause the specified impact
@@ -92,7 +98,7 @@ pub enum ImmediateImpact {
 pub enum LocationRestriction {
     LandTile,
     ReservedForOcean,
-    AdjacentToOwnedTileIfAble,  // some greenery placements don't have this! e.g. Mangrove
+    AdjacentToOwnedTileIfAble, // some greenery placements don't have this! e.g. Mangrove
     NotNextToAnyOtherTile,
     NotNextToACity,
     NextToACity,
@@ -104,7 +110,6 @@ pub enum LocationRestriction {
 pub enum SpecialLocation {
     // N.B.: Not all of these locations exist on all game maps.
     //       The base game ships with only the Tharsis map.
-
     PhobosSpaceHaven,
     GanymedeColony,
 
@@ -276,7 +281,12 @@ pub fn get_corporate_era_deck() -> Vec<Card> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{card::{Card, CardKind, CardTag, ImmediateImpact, get_base_game_deck, get_corporate_deck_only}, resource::PaymentCost};
+    use crate::{
+        card::{
+            get_base_game_deck, get_corporate_deck_only, Card, CardKind, CardTag, ImmediateImpact,
+        },
+        resource::PaymentCost,
+    };
 
     fn is_card_valid(card: &Card) -> bool {
         let mut is_valid = true;

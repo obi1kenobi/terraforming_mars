@@ -35,12 +35,14 @@
                     {
                         "Steel": 1
                     },
-                    {
-                        "GainResource": [
-                            "Megacredits",
-                            5
-                        ]
-                    }
+                    [
+                        {
+                            "GainResource": [
+                                "Megacredits",
+                                5
+                            ]
+                        }
+                    ]
                 ]
             }
         ]
@@ -460,9 +462,11 @@
                     {
                         "Energy": 1
                     },
-                    {
-                        "DrawCard": 1
-                    }
+                    [
+                        {
+                            "DrawCard": 1
+                        }
+                    ]
                 ]
             }
         ]
@@ -485,7 +489,9 @@
                     {
                         "Heat": 8
                     },
-                    "RaiseTerraformRating"
+                    [
+                        "RaiseTerraformRating"
+                    ]
                 ]
             }
         ]
@@ -547,12 +553,14 @@
                     {
                         "Titanium": 1
                     },
-                    {
-                        "AddResourceToSameCard": [
-                            "Fighter",
-                            1
-                        ]
-                    }
+                    [
+                        {
+                            "AddResourceToSameCard": [
+                                "Fighter",
+                                1
+                            ]
+                        }
+                    ]
                 ]
             }
         ]
@@ -787,12 +795,14 @@
                     {
                         "Megacredits": 7
                     },
-                    {
-                        "GainProduction": [
-                            "Steel",
-                            1
-                        ]
-                    }
+                    [
+                        {
+                            "GainProduction": [
+                                "Steel",
+                                1
+                            ]
+                        }
+                    ]
                 ]
             }
         ]
@@ -846,9 +856,11 @@
                     {
                         "Megacredits": 2
                     },
-                    {
-                        "DrawCard": 1
-                    }
+                    [
+                        {
+                            "DrawCard": 1
+                        }
+                    ]
                 ]
             }
         ]
@@ -1067,12 +1079,14 @@
                     {
                         "Energy": 6
                     },
-                    {
-                        "AddResourceToSameCard": [
-                            "Science",
-                            1
-                        ]
-                    }
+                    [
+                        {
+                            "AddResourceToSameCard": [
+                                "Science",
+                                1
+                            ]
+                        }
+                    ]
                 ]
             }
         ]
