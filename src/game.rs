@@ -7,17 +7,35 @@ use crate::{
     resource::Resource,
 };
 
+const CARD_PURCHASE_COST: usize = 3;
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PlayerState {
-    resources: BTreeMap<Resource, usize>,
-    production: BTreeMap<Resource, isize>,
-    played_cards: Vec<Card>,
-    tapped_active_cards: HashSet<Card>,
-    cards_in_hand: Vec<Card>,
-    terraform_rating: usize,
+    pub resources: BTreeMap<Resource, usize>,
+    pub production: BTreeMap<Resource, isize>,
+    pub played_cards: Vec<Card>,
+    pub tapped_active_cards: HashSet<Card>,
+    pub cards_in_hand: Vec<Card>,
+    pub terraform_rating: usize,
 }
 
 impl PlayerState {
+    pub fn purchase_cards(&mut self, cards: &Vec<&Card>) -> Option<()> {
+        let megacredits_balance = self.resources[&Resource::Megacredits];
+        let megacredits_cost = cards.len() * CARD_PURCHASE_COST;
+
+        if megacredits_balance < megacredits_cost {
+            None
+        } else {
+            self.cards_in_hand.extend(cards.iter().copied().cloned());
+            self.resources.insert(
+                Resource::Megacredits,
+                megacredits_balance - megacredits_cost,
+            );
+            Some(())
+        }
+    }
+
     pub fn played_event_count(&self) -> usize {
         self.played_cards
             .iter()
