@@ -1,12 +1,20 @@
 use std::collections::{BTreeMap, HashSet};
 
+use maplit::btreemap;
 use serde::{Deserialize, Serialize};
 
-use crate::{card::{Card, CardAction, CardEffect, CardKind, CardTag}, resource::{PaymentCost, Resource}};
+use crate::{
+    card::{Card, CardAction, CardEffect, CardKind, CardTag},
+    resource::{PaymentCost, Resource},
+};
 
 const CARD_PURCHASE_COST: usize = 3;
+const DEFAULT_STARTING_TERRAFORM_RATING: usize = 20;
+const DEFAULT_SOLO_STARTING_TERRAFORM_RATING: usize = 14;
+const DEFAULT_STEEL_VALUE: usize = 2;
+const DEFAULT_TITANIUM_VALUE: usize = 3;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PlayerState {
     pub resources: BTreeMap<Resource, usize>,
     pub production: BTreeMap<Resource, isize>,
@@ -17,6 +25,126 @@ pub struct PlayerState {
     pub steel_value: usize,
     pub titanium_value: usize,
     pub effects: Vec<CardEffect>,
+}
+
+pub struct PlayerStateBuilder {
+    pub resources: Option<BTreeMap<Resource, usize>>,
+    pub production: Option<BTreeMap<Resource, isize>>,
+    pub played_cards: Option<Vec<Card>>,
+    pub tapped_active_cards: Option<HashSet<Card>>,
+    pub cards_in_hand: Option<Vec<Card>>,
+    pub terraform_rating: usize,
+    pub effects: Option<Vec<CardEffect>>,
+}
+
+impl PlayerStateBuilder {
+    pub fn new() -> PlayerStateBuilder {
+        PlayerStateBuilder {
+            resources: None,
+            production: None,
+            played_cards: None,
+            tapped_active_cards: None,
+            cards_in_hand: None,
+            terraform_rating: DEFAULT_STARTING_TERRAFORM_RATING,
+            effects: None,
+        }
+    }
+
+    pub fn with_resources(
+        mut self,
+        megacredits: usize,
+        steel: usize,
+        titanium: usize,
+        plants: usize,
+        energy: usize,
+        heat: usize,
+    ) -> PlayerStateBuilder {
+        assert!(self.resources.is_none());
+
+        let resources = btreemap! {
+            Resource::Megacredits => megacredits,
+            Resource::Steel => steel,
+            Resource::Titanium => titanium,
+            Resource::Plants => plants,
+            Resource::Energy => energy,
+            Resource::Heat => heat,
+        };
+
+        self.resources = Some(resources);
+        self
+    }
+
+    pub fn with_production(
+        mut self,
+        megacredits: isize,
+        steel: isize,
+        titanium: isize,
+        plants: isize,
+        energy: isize,
+        heat: isize,
+    ) -> PlayerStateBuilder {
+        assert!(self.production.is_none());
+
+        assert!(steel >= 0);
+        assert!(titanium >= 0);
+        assert!(plants >= 0);
+        assert!(energy >= 0);
+        assert!(heat >= 0);
+
+        let production = btreemap! {
+            Resource::Megacredits => megacredits,
+            Resource::Steel => steel,
+            Resource::Titanium => titanium,
+            Resource::Plants => plants,
+            Resource::Energy => energy,
+            Resource::Heat => heat,
+        };
+
+        self.production = Some(production);
+        self
+    }
+
+    pub fn build(self) -> PlayerState {
+        let resources = self.resources.unwrap_or_else(
+            || btreemap! {
+                Resource::Megacredits => 0,
+                Resource::Steel => 0,
+                Resource::Titanium => 0,
+                Resource::Plants => 0,
+                Resource::Energy => 0,
+                Resource::Heat => 0,
+            }
+        );
+
+        let production = self.production.unwrap_or_else(
+            || btreemap! {
+                Resource::Megacredits => 0,
+                Resource::Steel => 0,
+                Resource::Titanium => 0,
+                Resource::Plants => 0,
+                Resource::Energy => 0,
+                Resource::Heat => 0,
+            }
+        );
+
+        PlayerState {
+            resources,
+            production,
+            played_cards: self.played_cards.unwrap_or_default(),
+            tapped_active_cards: self.tapped_active_cards.unwrap_or_default(),
+            cards_in_hand: self.cards_in_hand.unwrap_or_default(),
+            terraform_rating: self.terraform_rating,
+            steel_value: DEFAULT_STEEL_VALUE,  // TODO: adjust for the advanced alloys effect
+            titanium_value: DEFAULT_TITANIUM_VALUE,  // TODO: adjust for the advanced alloys effect
+            effects: self.effects.unwrap_or_default(),
+        }
+    }
+}
+
+impl Default for PlayerStateBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl PlayerState {
@@ -41,9 +169,7 @@ impl PlayerState {
         let megacredits_balance = self.resources[&Resource::Megacredits];
 
         let can_pay = match &card.cost {
-            PaymentCost::Megacredits(x) => {
-                *x <= megacredits_balance
-            }
+            PaymentCost::Megacredits(x) => *x <= megacredits_balance,
             PaymentCost::Building(x) => {
                 let steel_balance = self.resources[&Resource::Steel];
 
@@ -58,16 +184,14 @@ impl PlayerState {
                 let steel_balance = self.resources[&Resource::Steel];
                 let titanium_balance = self.resources[&Resource::Titanium];
 
-                *x <= (
-                    megacredits_balance +
-                    (steel_balance * self.steel_value) +
-                    (titanium_balance * self.titanium_value)
-                )
+                *x <= (megacredits_balance
+                    + (steel_balance * self.steel_value)
+                    + (titanium_balance * self.titanium_value))
             }
-            _ => unreachable!()
+            _ => unreachable!(),
         };
 
-        let satisfies_requirements = true;  // TODO: implement me
+        let satisfies_requirements = true; // TODO: implement me
 
         if satisfies_requirements && can_pay {
             let cloned_cost = card.cost.clone();
@@ -142,10 +266,10 @@ impl PlayerState {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct MarsBoard {}
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum TurnAction {
     PlayStandardProject,
     PlayCard(Card),
@@ -154,7 +278,7 @@ pub enum TurnAction {
     FundAward,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum PlayerTurn {
     Play(TurnAction, Option<TurnAction>),
     Pass,

@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::{collections::BTreeMap, hash::Hash};
+use std::{collections::{BTreeMap, HashMap}, hash::Hash};
 
 use crate::resource::{CardResource, PaymentCost, Resource};
 
@@ -304,6 +304,18 @@ pub fn get_corporate_era_deck() -> Vec<Card> {
     let mut deck = get_base_game_deck();
     deck.extend(get_corporate_deck_only());
     deck
+}
+
+fn get_cards_by_name(cards: &'static Vec<Card>) -> HashMap<&'static str, &'static Card> {
+    cards.iter().map(|card| (card.name.as_ref(), card)).collect()
+}
+
+lazy_static! {
+    pub static ref BASE_GAME_DECK: Vec<Card> = get_base_game_deck();
+    pub static ref CORPORATE_ERA_DECK: Vec<Card> = get_corporate_era_deck();
+
+    pub static ref BASE_GAME_CARDS_BY_NAME: HashMap<&'static str, &'static Card> = get_cards_by_name(&BASE_GAME_DECK);
+    pub static ref CORPORATE_GAME_CARDS_BY_NAME: HashMap<&'static str, &'static Card> = get_cards_by_name(&CORPORATE_ERA_DECK);
 }
 
 #[cfg(test)]
