@@ -1,10 +1,7 @@
 use crate::{
     card::Card,
-    game::{PlayerState, PlayerTurn},
+    game::{PlayerState, PlayerTurn, TurnAction},
 };
-
-#[derive(Clone, Debug)]
-pub struct SimState {}
 
 pub fn get_possible_generation_plays(
     initial_state: &PlayerState,
@@ -47,8 +44,47 @@ pub fn get_possible_generation_plays(
 }
 
 fn make_all_possible_plays(
-    _initial_state: &PlayerState,
-    _opponent_states: &Vec<&PlayerState>,
+    initial_state: &PlayerState,
+    opponent_states: &Vec<&PlayerState>,
 ) -> Vec<(Vec<PlayerTurn>, PlayerState)> {
-    todo!()
+    let mut next_card_index_to_consider: usize = 0;
+
+    _make_all_possible_plays_recursively(&mut next_card_index_to_consider, initial_state, opponent_states)
+}
+
+fn _make_all_possible_plays_recursively(
+    next_card_index_to_consider: &mut usize,
+    initial_state: &PlayerState,
+    opponent_states: &Vec<&PlayerState>,
+) -> Vec<(Vec<PlayerTurn>, PlayerState)> {
+    match initial_state.cards_in_hand.get(*next_card_index_to_consider) {
+        None => {
+            vec![(vec![], initial_state.clone())]
+        }
+        Some(card) => {
+            let mut state = initial_state.clone();
+
+            let play_vector = match state.play_card(*next_card_index_to_consider) {
+                None => {
+                    vec![]
+                }
+                Some(_) => {
+                    vec![PlayerTurn::Play(TurnAction::PlayCard(card.clone()), None)]
+                }
+            };
+
+            let mut result = vec![];
+            *next_card_index_to_consider += 1;
+            for (mut moves, final_state) in
+                _make_all_possible_plays_recursively(next_card_index_to_consider, &state, opponent_states)
+            {
+                let mut final_plays = play_vector.clone();
+                final_plays.extend(moves.drain(..));
+                result.push((final_plays, final_state));
+            }
+
+            *next_card_index_to_consider -= 1;
+            result
+        }
+    }
 }

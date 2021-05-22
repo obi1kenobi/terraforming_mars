@@ -2,10 +2,7 @@ use std::collections::{BTreeMap, HashSet};
 
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    card::{Card, CardAction, CardKind, CardTag},
-    resource::Resource,
-};
+use crate::{card::{Card, CardAction, CardEffect, CardKind, CardTag}, resource::{PaymentCost, Resource}};
 
 const CARD_PURCHASE_COST: usize = 3;
 
@@ -17,6 +14,9 @@ pub struct PlayerState {
     pub tapped_active_cards: HashSet<Card>,
     pub cards_in_hand: Vec<Card>,
     pub terraform_rating: usize,
+    pub steel_value: usize,
+    pub titanium_value: usize,
+    pub effects: Vec<CardEffect>,
 }
 
 impl PlayerState {
@@ -33,6 +33,54 @@ impl PlayerState {
                 megacredits_balance - megacredits_cost,
             );
             Some(())
+        }
+    }
+
+    pub fn play_card(&mut self, index_in_hand: usize) -> Option<PaymentCost> {
+        let card = &self.cards_in_hand[index_in_hand];
+        let megacredits_balance = self.resources[&Resource::Megacredits];
+
+        let can_pay = match &card.cost {
+            PaymentCost::Megacredits(x) => {
+                *x <= megacredits_balance
+            }
+            PaymentCost::Building(x) => {
+                let steel_balance = self.resources[&Resource::Steel];
+
+                *x <= (megacredits_balance + (steel_balance * self.steel_value))
+            }
+            PaymentCost::Space(x) => {
+                let titanium_balance = self.resources[&Resource::Titanium];
+
+                *x <= (megacredits_balance + (titanium_balance * self.titanium_value))
+            }
+            PaymentCost::SpaceOrBuilding(x) => {
+                let steel_balance = self.resources[&Resource::Steel];
+                let titanium_balance = self.resources[&Resource::Titanium];
+
+                *x <= (
+                    megacredits_balance +
+                    (steel_balance * self.steel_value) +
+                    (titanium_balance * self.titanium_value)
+                )
+            }
+            _ => unreachable!()
+        };
+
+        let satisfies_requirements = true;  // TODO: implement me
+
+        if satisfies_requirements && can_pay {
+            let cloned_cost = card.cost.clone();
+
+            self.effects.extend_from_slice(&card.effects);
+            // TODO: resolve immediate impacts
+
+            let owned_card = self.cards_in_hand.swap_remove(index_in_hand);
+            self.played_cards.push(owned_card);
+
+            Some(cloned_cost)
+        } else {
+            None
         }
     }
 
