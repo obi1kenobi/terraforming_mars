@@ -198,6 +198,18 @@ impl PlayerStateBuilder {
             .map(|cards| cards.iter().flat_map(|c| c.effects.clone()).collect())
             .unwrap_or_default();
 
+        let mut steel_value = DEFAULT_STEEL_VALUE;
+        let mut titanium_value = DEFAULT_TITANIUM_VALUE;
+        for effect in &effects {
+            match effect {
+                &CardEffect::IncreasedMetalsValue(increase) => {
+                    steel_value += increase;
+                    titanium_value += increase;
+                }
+                _ => {}
+            }
+        }
+
         PlayerState {
             resources,
             production,
@@ -206,8 +218,8 @@ impl PlayerStateBuilder {
             tapped_active_cards: self.tapped_active_cards.unwrap_or_default(),
             cards_in_hand: self.cards_in_hand.unwrap_or_default(),
             terraform_rating: self.terraform_rating,
-            steel_value: DEFAULT_STEEL_VALUE, // TODO: adjust for the advanced alloys effect
-            titanium_value: DEFAULT_TITANIUM_VALUE, // TODO: adjust for the advanced alloys effect
+            steel_value: steel_value,
+            titanium_value: titanium_value,
             city_count: self.city_count,
             effects: effects,
             current_total_points: current_total_points,
