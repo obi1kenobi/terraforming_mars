@@ -58,6 +58,16 @@ impl PlayerStateBuilder {
         }
     }
 
+    pub fn with_cities(mut self, city_count: usize) -> PlayerStateBuilder {
+        self.city_count = city_count;
+        self
+    }
+
+    pub fn with_played_cards(mut self, played_cards: Vec<Card>) -> PlayerStateBuilder {
+        self.played_cards = Some(played_cards);
+        self
+    }
+
     pub fn with_resources(
         mut self,
         megacredits: usize,
@@ -369,4 +379,31 @@ pub enum TurnAction {
 pub enum PlayerTurn {
     Play(TurnAction, Option<TurnAction>),
     Pass,
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::game::DEFAULT_STARTING_TERRAFORM_RATING;
+    use crate::game::PlayerStateBuilder;
+    use crate::card::BASE_GAME_CARDS_BY_NAME;
+
+    #[test]
+    fn test_victory_points_from_tags_count_own_card_tags() {
+        let played_cards: Vec<_> = [
+            BASE_GAME_CARDS_BY_NAME["Ganymede Colony"],           // Jovian + 1VP/Jovian
+            BASE_GAME_CARDS_BY_NAME["Water Import From Europa"],  // Jovian + 1VP/Jovian
+            BASE_GAME_CARDS_BY_NAME["Methane From Titan"],        // Jovian + 2VP immediate
+            BASE_GAME_CARDS_BY_NAME["Tundra Farming"],            // 2VP immediate, not Jovian
+        ].iter().copied().cloned().collect();
+
+        let player_state = PlayerStateBuilder::new()
+            .with_played_cards(played_cards)
+            .build();
+
+        // cards are worth 10 points:
+        // 3 Jovian tags valued at 2VP per Jovian card + 4VP immediate
+        let points_from_cards: isize = 10;
+        let expected_points = (DEFAULT_STARTING_TERRAFORM_RATING as isize) + points_from_cards;
+        assert_eq!(expected_points, player_state.current_total_points);
+    }
 }
