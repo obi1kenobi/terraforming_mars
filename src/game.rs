@@ -4,8 +4,8 @@ use maplit::btreemap;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    card::{Card, CardAction, CardEffect, CardKind, CardTag},
-    resource::{PaymentCost, Resource},
+    card::{Card, CardAction, CardEffect, CardKind, CardTag, VictoryPointValue},
+    resource::{CardResource, PaymentCost, Resource},
 };
 
 const CARD_PURCHASE_COST: usize = 3;
@@ -16,25 +16,32 @@ const DEFAULT_TITANIUM_VALUE: usize = 3;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PlayerState {
+    // primary data
     pub resources: BTreeMap<Resource, usize>,
     pub production: BTreeMap<Resource, isize>,
     pub played_cards: Vec<Card>,
+    pub card_resources: BTreeMap<(Card, CardResource), usize>,
     pub tapped_active_cards: HashSet<Card>,
     pub cards_in_hand: Vec<Card>,
     pub terraform_rating: usize,
     pub steel_value: usize,
     pub titanium_value: usize,
+    pub city_count: usize,
+
+    // indexes of primary data
     pub effects: Vec<CardEffect>,
+    pub current_total_points: isize, // total victory points from all sources: cards, TR, etc.
 }
 
 pub struct PlayerStateBuilder {
     pub resources: Option<BTreeMap<Resource, usize>>,
     pub production: Option<BTreeMap<Resource, isize>>,
     pub played_cards: Option<Vec<Card>>,
+    pub card_resources: BTreeMap<(Card, CardResource), usize>,
     pub tapped_active_cards: Option<HashSet<Card>>,
     pub cards_in_hand: Option<Vec<Card>>,
     pub terraform_rating: usize,
-    pub effects: Option<Vec<CardEffect>>,
+    pub city_count: usize,
 }
 
 impl PlayerStateBuilder {
@@ -43,10 +50,11 @@ impl PlayerStateBuilder {
             resources: None,
             production: None,
             played_cards: None,
+            card_resources: btreemap! {},
             tapped_active_cards: None,
             cards_in_hand: None,
             terraform_rating: DEFAULT_STARTING_TERRAFORM_RATING,
-            effects: None,
+            city_count: 0,
         }
     }
 
@@ -105,19 +113,11 @@ impl PlayerStateBuilder {
     }
 
     pub fn build(self) -> PlayerState {
-        let resources = self.resources.unwrap_or_else(
-            || btreemap! {
-                Resource::Megacredits => 0,
-                Resource::Steel => 0,
-                Resource::Titanium => 0,
-                Resource::Plants => 0,
-                Resource::Energy => 0,
-                Resource::Heat => 0,
-            }
-        );
+        let city_count = self.city_count;
+        let card_resources = self.card_resources;
 
-        let production = self.production.unwrap_or_else(
-            || btreemap! {
+        let resources = self.resources.unwrap_or_else(|| {
+            btreemap! {
                 Resource::Megacredits => 0,
                 Resource::Steel => 0,
                 Resource::Titanium => 0,
@@ -125,18 +125,82 @@ impl PlayerStateBuilder {
                 Resource::Energy => 0,
                 Resource::Heat => 0,
             }
-        );
+        });
+
+        let production = self.production.unwrap_or_else(|| {
+            btreemap! {
+                Resource::Megacredits => 0,
+                Resource::Steel => 0,
+                Resource::Titanium => 0,
+                Resource::Plants => 0,
+                Resource::Energy => 0,
+                Resource::Heat => 0,
+            }
+        });
+
+        let mut current_total_points = self.terraform_rating as isize;
+        let card_points: isize = self
+            .played_cards
+            .as_ref()
+            .map(|cards| {
+                cards
+                    .iter()
+                    .map(|c| match c.points {
+                        Some(VictoryPointValue::Immediate(x)) => x,
+                        Some(VictoryPointValue::PerTag(vp, count, tag)) => {
+                            assert!(tag != CardTag::Event);
+
+                            let tag_count = cards.active_tag_count(tag);
+                            ((tag_count / count) * vp) as isize
+                        }
+                        Some(VictoryPointValue::PerCardResource(vp, count, cr)) => {
+                            let resources_present = card_resources.get(&(c.clone(), cr)).copied().unwrap_or_default();
+
+                            ((resources_present / count) * vp) as isize
+                        }
+                        Some(VictoryPointValue::FixedPointsIfAnyCardResourcePresent(
+                            count,
+                            cr,
+                        )) => {
+                            let resources_present = card_resources.get(&(c.clone(), cr)).copied().unwrap_or_default();
+                            if resources_present > 0 {
+                                count as isize
+                            } else {
+                                0
+                            }
+                        }
+                        Some(VictoryPointValue::PerCity(vp)) => {
+                            (city_count * vp) as isize
+                        }
+                        Some(VictoryPointValue::PerNCities(n_cities)) => {
+                            (city_count / n_cities) as isize
+                        }
+                        None => 0,
+                    })
+                    .sum()
+            })
+            .unwrap_or_default();
+        current_total_points += card_points;
+
+        let effects: Vec<_> = self
+            .played_cards
+            .as_ref()
+            .map(|cards| cards.iter().flat_map(|c| c.effects.clone()).collect())
+            .unwrap_or_default();
 
         PlayerState {
             resources,
             production,
             played_cards: self.played_cards.unwrap_or_default(),
+            card_resources: card_resources,
             tapped_active_cards: self.tapped_active_cards.unwrap_or_default(),
             cards_in_hand: self.cards_in_hand.unwrap_or_default(),
             terraform_rating: self.terraform_rating,
-            steel_value: DEFAULT_STEEL_VALUE,  // TODO: adjust for the advanced alloys effect
-            titanium_value: DEFAULT_TITANIUM_VALUE,  // TODO: adjust for the advanced alloys effect
-            effects: self.effects.unwrap_or_default(),
+            steel_value: DEFAULT_STEEL_VALUE, // TODO: adjust for the advanced alloys effect
+            titanium_value: DEFAULT_TITANIUM_VALUE, // TODO: adjust for the advanced alloys effect
+            city_count: self.city_count,
+            effects: effects,
+            current_total_points: current_total_points,
         }
     }
 }
@@ -144,6 +208,43 @@ impl PlayerStateBuilder {
 impl Default for PlayerStateBuilder {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+trait ActiveTags {
+    fn active_tag_count(&self, tag_kind: CardTag) -> usize;
+    fn active_tag_count_for_action(&self, tag_kind: CardTag) -> usize;
+    fn event_count(&self) -> usize;
+    fn get_non_event_tags(&self) -> Box<dyn Iterator<Item = CardTag> + '_>;
+}
+
+impl ActiveTags for Vec<Card> {
+    fn event_count(&self) -> usize {
+        self.iter()
+            .filter(|card| card.kind == CardKind::Event)
+            .count()
+    }
+
+    fn active_tag_count(&self, tag_kind: CardTag) -> usize {
+        assert_ne!(tag_kind, CardTag::Event);
+        self.get_non_event_tags()
+            .filter(|&tag| tag == tag_kind)
+            .count()
+    }
+
+    fn active_tag_count_for_action(&self, tag_kind: CardTag) -> usize {
+        // Wild tags only count for the purposes of performing actions.
+        assert_ne!(tag_kind, CardTag::Event);
+        self.get_non_event_tags()
+            .filter(|&tag| tag == tag_kind || tag == CardTag::Wild)
+            .count()
+    }
+
+    fn get_non_event_tags(&self) -> Box<dyn Iterator<Item = CardTag> + '_> {
+        Box::new(self.iter().flat_map(|card| match card.kind {
+            CardKind::Event => [].iter().copied(),
+            _ => card.tags.iter().copied(),
+        }))
     }
 }
 
@@ -164,7 +265,7 @@ impl PlayerState {
         }
     }
 
-    pub fn play_card(&mut self, index_in_hand: usize) -> Option<PaymentCost> {
+    pub fn can_play_card(&self, index_in_hand: usize) -> Option<PaymentCost> {
         let card = &self.cards_in_hand[index_in_hand];
         let megacredits_balance = self.resources[&Resource::Megacredits];
 
@@ -195,46 +296,10 @@ impl PlayerState {
 
         if satisfies_requirements && can_pay {
             let cloned_cost = card.cost.clone();
-
-            self.effects.extend_from_slice(&card.effects);
-            // TODO: resolve immediate impacts
-
-            let owned_card = self.cards_in_hand.swap_remove(index_in_hand);
-            self.played_cards.push(owned_card);
-
             Some(cloned_cost)
         } else {
             None
         }
-    }
-
-    pub fn played_event_count(&self) -> usize {
-        self.played_cards
-            .iter()
-            .filter(|card| card.kind == CardKind::Event)
-            .count()
-    }
-
-    pub fn active_tag_count(&self, tag_kind: CardTag) -> usize {
-        assert_ne!(tag_kind, CardTag::Event);
-        self.get_played_non_event_tags()
-            .filter(|&tag| tag == tag_kind)
-            .count()
-    }
-
-    pub fn active_tag_count_for_action(&self, tag_kind: CardTag) -> usize {
-        // Wild tags only count for the purposes of performing actions.
-        assert_ne!(tag_kind, CardTag::Event);
-        self.get_played_non_event_tags()
-            .filter(|&tag| tag == tag_kind || tag == CardTag::Wild)
-            .count()
-    }
-
-    fn get_played_non_event_tags(&self) -> impl Iterator<Item = CardTag> + '_ {
-        self.played_cards.iter().flat_map(|card| match card.kind {
-            CardKind::Event => [].iter().copied(),
-            _ => card.tags.iter().copied(),
-        })
     }
 
     pub fn advance_generation(&mut self) {
@@ -266,8 +331,30 @@ impl PlayerState {
     }
 }
 
+impl ActiveTags for PlayerState {
+    fn event_count(&self) -> usize {
+        self.played_cards.event_count()
+    }
+
+    fn active_tag_count(&self, tag_kind: CardTag) -> usize {
+        self.played_cards.active_tag_count(tag_kind)
+    }
+
+    fn active_tag_count_for_action(&self, tag_kind: CardTag) -> usize {
+        self.played_cards.active_tag_count_for_action(tag_kind)
+    }
+
+    fn get_non_event_tags(&self) -> Box<dyn Iterator<Item = CardTag> + '_> {
+        self.played_cards.get_non_event_tags()
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct MarsBoard {}
+pub struct MarsBoard {
+    pub placed_oceans: usize,
+    pub oxygen: usize,
+    pub temperature: isize,
+}
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum TurnAction {

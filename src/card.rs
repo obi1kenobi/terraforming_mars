@@ -3,7 +3,7 @@ use std::{collections::{BTreeMap, HashMap}, hash::Hash};
 
 use crate::resource::{CardResource, PaymentCost, Resource};
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialOrd, Ord, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum CardTag {
     Building,
     Space,
@@ -19,7 +19,7 @@ pub enum CardTag {
     Event,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialOrd, Ord, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum CardRequirement {
     MaxOxygen(usize),
     MinOxygen(usize),
@@ -32,14 +32,14 @@ pub enum CardRequirement {
     MinProduction(Resource, usize),
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialOrd, Ord, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum CardKind {
     Active,
     Automatic,
     Event,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialOrd, Ord, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum CardAction {
     CauseFreeImpact(ImmediateImpact),
     SpendResource(PaymentCost, Vec<ImmediateImpact>),
@@ -57,7 +57,7 @@ pub enum CardAction {
     RandomizeBasedOnRevealedCardTag(Resource, usize, CardTag, ImmediateImpact),
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Debug,PartialOrd, Ord, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ImmediateImpact {
     RaiseTemperature,
     RaiseOxygen,
@@ -102,7 +102,7 @@ pub enum ImmediateImpact {
     CopyProductionOfCard(CardTag),
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialOrd, Ord, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum LocationRestriction {
     LandTile,
     ReservedForOcean,
@@ -120,7 +120,7 @@ pub enum LocationRestriction {
     AtSpecialLocation(SpecialLocation),
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialOrd, Ord, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum SpecialLocation {
     // N.B.: Not all of these locations exist on all game maps.
     //       The base game ships with only the Tharsis map.
@@ -141,7 +141,7 @@ pub enum SpecialLocation {
     VolcanicArea,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialOrd, Ord, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum CityKind {
     RegularCity,
     Capital,          // regular city + scores 1VP per adjacent ocean
@@ -153,7 +153,7 @@ pub enum CityKind {
     ResearchOutpost,  // placed next to no other tile
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialOrd, Ord, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum SpecialTile {
     NuclearZone,
     RestrictedArea,
@@ -167,7 +167,7 @@ pub enum SpecialTile {
     MiningArea,         // placed on steel/titanium placement bonus, adjacent to owned tile
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialOrd, Ord, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum VictoryPointValue {
     Immediate(isize),
 
@@ -182,7 +182,7 @@ pub enum VictoryPointValue {
     FixedPointsIfAnyCardResourcePresent(usize, CardResource),
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialOrd, Ord, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum CardEffect {
     AnyCardDiscount(usize),
 
@@ -213,7 +213,7 @@ pub enum CardEffect {
     OnOwnTagCombinationPlayed(Vec<CardTag>, Vec<ImmediateImpact>),  // all the tags are on the same card
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialOrd, Ord, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Card {
     pub name: String,
     pub kind: CardKind,
