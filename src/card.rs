@@ -1,5 +1,8 @@
 use serde::{Deserialize, Serialize};
-use std::{collections::{BTreeMap, HashMap}, hash::Hash};
+use std::{
+    collections::{BTreeMap, HashMap},
+    hash::Hash,
+};
 
 use crate::resource::{CardResource, PaymentCost, Resource};
 
@@ -57,7 +60,7 @@ pub enum CardAction {
     RandomizeBasedOnRevealedCardTag(Resource, usize, CardTag, ImmediateImpact),
 }
 
-#[derive(Clone, Debug,PartialOrd, Ord, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialOrd, Ord, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ImmediateImpact {
     RaiseTemperature,
     RaiseOxygen,
@@ -75,7 +78,7 @@ pub enum ImmediateImpact {
     AddResourceToSameCard(CardResource, usize), // card that caused the impact
     AddResourceToAnotherCard(CardResource, usize), // *not* the card that caused the impact
     AddResourceToAnyCard(CardResource, usize), // any card, including the one that caused the impact
-    AddResourceToPlayedCard(CardResource, usize),  // used when impact is triggered from an effect
+    AddResourceToPlayedCard(CardResource, usize), // used when impact is triggered from an effect
 
     GainResource(Resource, usize),
     GainResourcePerCity(Resource, usize),
@@ -210,7 +213,7 @@ pub enum CardEffect {
     // whenever the player with this effect does the thing
     OnOwnPlacedGreenery(ImmediateImpact),
     OnOwnTagPlayed(CardTag, ImmediateImpact),
-    OnOwnTagCombinationPlayed(Vec<CardTag>, Vec<ImmediateImpact>),  // all the tags are on the same card
+    OnOwnTagCombinationPlayed(Vec<CardTag>, Vec<ImmediateImpact>), // all the tags are on the same card
 }
 
 #[derive(Clone, Debug, PartialOrd, Ord, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -286,6 +289,44 @@ impl Card {
             effects,
         }
     }
+
+    pub fn supports_card_resource(&self) -> Option<CardResource> {
+        let mut result: Option<CardResource> = None;
+        let mut possible_impacts: Vec<&ImmediateImpact> = vec![];
+
+        for action in &self.actions {
+            match action {
+                CardAction::SpendSameCardResource(cr, _, impact) => {
+                    assert_eq!(*cr, result.unwrap_or(*cr));
+                    result = Some(*cr);
+
+                    possible_impacts.push(impact);
+                }
+                CardAction::CauseFreeImpact(impact)
+                | CardAction::TakeAnyCardResource(_, _, impact)
+                | CardAction::RandomizeBasedOnRevealedCardTag(_, _, _, impact) => {
+                    possible_impacts.push(impact)
+                }
+                CardAction::SpendResource(_, impacts)
+                | CardAction::SpendProduction(_, _, impacts) => {
+                    possible_impacts.extend(impacts.iter());
+                }
+            }
+        }
+
+        for impact in possible_impacts {
+            match impact {
+                ImmediateImpact::AddResourceToSameCard(cr, _)
+                | ImmediateImpact::AddResourceToPlayedCard(cr, _) => {
+                    assert_eq!(*cr, result.unwrap_or(*cr));
+                    result = Some(*cr);
+                }
+                _ => {}
+            }
+        }
+
+        result
+    }
 }
 
 pub fn get_base_game_deck() -> Vec<Card> {
@@ -307,25 +348,27 @@ pub fn get_corporate_era_deck() -> Vec<Card> {
 }
 
 fn get_cards_by_name(cards: &'static Vec<Card>) -> HashMap<&'static str, &'static Card> {
-    cards.iter().map(|card| (card.name.as_ref(), card)).collect()
+    cards
+        .iter()
+        .map(|card| (card.name.as_ref(), card))
+        .collect()
 }
 
 lazy_static! {
     pub static ref BASE_GAME_DECK: Vec<Card> = get_base_game_deck();
     pub static ref CORPORATE_ERA_DECK: Vec<Card> = get_corporate_era_deck();
-
-    pub static ref BASE_GAME_CARDS_BY_NAME: HashMap<&'static str, &'static Card> = get_cards_by_name(&BASE_GAME_DECK);
-    pub static ref CORPORATE_GAME_CARDS_BY_NAME: HashMap<&'static str, &'static Card> = get_cards_by_name(&CORPORATE_ERA_DECK);
+    pub static ref BASE_GAME_CARDS_BY_NAME: HashMap<&'static str, &'static Card> =
+        get_cards_by_name(&BASE_GAME_DECK);
+    pub static ref CORPORATE_GAME_CARDS_BY_NAME: HashMap<&'static str, &'static Card> =
+        get_cards_by_name(&CORPORATE_ERA_DECK);
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        card::{
+    use crate::{card::{
             get_base_game_deck, get_corporate_deck_only, Card, CardKind, CardTag, ImmediateImpact,
-        },
-        resource::PaymentCost,
-    };
+            BASE_GAME_CARDS_BY_NAME,
+        }, resource::{CardResource, PaymentCost}};
 
     fn is_card_valid(card: &Card) -> bool {
         let mut is_valid = true;
@@ -393,5 +436,17 @@ mod tests {
 
         let invalid_cards: Vec<_> = cards.iter().filter(|x| !is_card_valid(x)).collect();
         assert!(invalid_cards.is_empty(), "{:?}", invalid_cards);
+    }
+
+    #[test]
+    fn card_resource_is_detected_properly() {
+        let card = BASE_GAME_CARDS_BY_NAME["Predators"];
+        assert_eq!(Some(CardResource::Animal), card.supports_card_resource());
+    }
+
+    #[test]
+    fn cards_that_only_transfer_card_resources_do_not_support_their_own_card_resource() {
+        let card = BASE_GAME_CARDS_BY_NAME["Ants"];
+        assert_eq!(None, card.supports_card_resource());
     }
 }

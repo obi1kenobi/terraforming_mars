@@ -2967,7 +2967,7 @@
                     "Microbe",
                     1,
                     {
-                        "AddResourceToSameCard": [
+                        "AddResourceToAnyCard": [
                             "Microbe",
                             1
                         ]
