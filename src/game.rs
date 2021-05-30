@@ -3,10 +3,7 @@ use std::collections::{BTreeMap, HashSet};
 use maplit::btreemap;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    card::{Card, CardAction, CardEffect, CardKind, CardTag, VictoryPointValue},
-    resource::{CardResource, PaymentCost, Resource},
-};
+use crate::{card::{Card, CardAction, CardEffect, CardKind, CardTag, VictoryPointValue}, resource::{CardResource, PaymentCost, Resource}};
 
 const CARD_PURCHASE_COST: usize = 3;
 const DEFAULT_STARTING_TERRAFORM_RATING: usize = 20;
@@ -369,13 +366,6 @@ impl ActiveTags for PlayerState {
     fn get_non_event_tags(&self) -> Box<dyn Iterator<Item = CardTag> + '_> {
         self.played_cards.get_non_event_tags()
     }
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct MarsBoard {
-    pub placed_oceans: usize,
-    pub oxygen: usize,
-    pub temperature: isize,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
