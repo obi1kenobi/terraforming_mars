@@ -95,6 +95,16 @@ pub enum TileLocation {
     OffMars(SpecialLocation),
 }
 
+impl TileLocation {
+    pub fn neighbors_within_bounds(&self) -> impl Iterator<Item = Self> {
+        let maybe_iter = match self {
+            &Self::OnMars(coord) => Some(coord.neighbors_within_bounds().map(|x| TileLocation::OnMars(x))),
+            &Self::OffMars(_) => None,
+        };
+        maybe_iter.into_iter().flatten()
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct MarsBoard {
     pub tiles: BTreeMap<TileLocation, BoardTile>,
