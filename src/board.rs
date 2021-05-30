@@ -7,9 +7,91 @@ use crate::{
     resource::Resource,
 };
 
+/// Using implicit 3-axis "cube" coordinate system, with all points satisfying x + y + z = 0.
+/// We always drop the z coordinate, since it's implicitly z = -(x + y).
+/// Properties:
+/// - (0, 0) on the left-most hex of the center row.
+/// - Bottom left edge has x = 0. The x coordinate increases to the top-right.
+/// - Top left edge has y = 0. The y coordinate increases to the top-left.
+/// - Center row has z = 0. The z coordinate increases downward.
+///
+/// Diagram at:
+/// https://www.redblobgames.com/grids/hexagons/
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+pub struct Coordinates {
+    x: isize,
+    y: isize,
+}
+
+impl Coordinates {
+    const BOUNDS_MIN_X: isize = 0;
+    const BOUNDS_MAX_X: isize = 8;
+    const BOUNDS_MIN_Y: isize = -8;
+    const BOUNDS_MAX_Y: isize = 0;
+    const BOUNDS_MIN_Z: isize = -4;
+    const BOUNDS_MAX_Z: isize = 4;
+
+    const NEIGHBORS_DX_DY: [(isize, isize); 6] = [
+        // clockwise neighbors, starting from the right neighbor
+        (1, -1),
+        (0, -1),
+        (-1, 0),
+        (-1, 1),
+        (0, 1),
+        (1, 0),
+    ];
+
+    #[inline]
+    pub fn new(x: isize, y: isize) -> Self {
+        Self { x, y }
+    }
+
+    #[inline]
+    pub const fn get_z(&self) -> isize {
+        -(self.x + self.y)
+    }
+
+    #[inline]
+    pub fn is_in_bounds(&self) -> bool {
+        // Check that the point is between the bottom-left and the top-right edge.
+        let within_x = self.x >= Coordinates::BOUNDS_MIN_X && self.x <= Coordinates::BOUNDS_MAX_X;
+
+        // Check that the point is between the bottom-right and the top-left edge.
+        let within_y = self.y >= Coordinates::BOUNDS_MIN_Y && self.y <= Coordinates::BOUNDS_MAX_Y;
+
+        // Check that the point is between the top and bottom edges.
+        let z = self.get_z();
+        let within_z = z >= Coordinates::BOUNDS_MIN_Z && z <= Coordinates::BOUNDS_MAX_Z;
+
+        within_x && within_y && within_z
+    }
+
+    pub fn neighbors_within_bounds(&self) -> impl Iterator<Item = Self> {
+        let x = self.x;
+        let y = self.y;
+
+        Coordinates::NEIGHBORS_DX_DY
+            .iter()
+            .map(move |(dx, dy)| {
+                let new_x = x + dx;
+                let new_y = y + dy;
+
+                (new_x, new_y).into()
+            })
+            .filter(Coordinates::is_in_bounds)
+    }
+}
+
+impl From<(isize, isize)> for Coordinates {
+    #[inline]
+    fn from(coordinates: (isize, isize)) -> Self {
+        Self::new(coordinates.0, coordinates.1)
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct MarsBoard {
-    pub mars_tiles: BTreeMap<(isize, isize), BoardTile>,
+    pub mars_tiles: BTreeMap<Coordinates, BoardTile>,
     pub special_tiles: Vec<BoardTile>,
     pub placed_oceans: usize,
     pub oxygen: usize,
@@ -18,7 +100,7 @@ pub struct MarsBoard {
 
 impl MarsBoard {
     pub fn new(
-        mars_tiles: BTreeMap<(isize, isize), BoardTile>,
+        mars_tiles: BTreeMap<Coordinates, BoardTile>,
         special_tiles: Vec<BoardTile>,
         placed_oceans: usize,
         oxygen: usize,
@@ -46,7 +128,7 @@ pub enum TileDesignation {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct BoardTile {
     pub name: Option<String>,
-    pub mars_coordinates: Option<(isize, isize)>, // non-Mars tiles don't have Mars coordinates
+    pub mars_coordinates: Option<Coordinates>, // non-Mars tiles don't have Mars coordinates
     pub designations: Vec<TileDesignation>,
     pub placement_bonus: Vec<ImmediateImpact>,
 }
@@ -54,7 +136,7 @@ pub struct BoardTile {
 impl BoardTile {
     pub fn new(
         name: Option<String>,
-        mars_coordinates: Option<(isize, isize)>,
+        mars_coordinates: Option<Coordinates>,
         designations: Vec<TileDesignation>,
         placement_bonus: Vec<ImmediateImpact>,
     ) -> BoardTile {
@@ -67,17 +149,22 @@ impl BoardTile {
     }
 
     #[inline]
-    pub fn new_unnamed(
-        mars_coordinates: (isize, isize),
+    pub fn new_unnamed<CoordT: Into<Coordinates>>(
+        mars_coordinates: CoordT,
         designations: Vec<TileDesignation>,
         placement_bonus: Vec<ImmediateImpact>,
     ) -> BoardTile {
-        BoardTile::new(None, Some(mars_coordinates), designations, placement_bonus)
+        BoardTile::new(
+            None,
+            Some(mars_coordinates.into()),
+            designations,
+            placement_bonus,
+        )
     }
 
     #[inline]
-    pub fn new_unnamed_land(
-        mars_coordinates: (isize, isize),
+    pub fn new_unnamed_land<CoordT: Into<Coordinates>>(
+        mars_coordinates: CoordT,
         placement_bonus: Vec<ImmediateImpact>,
     ) -> BoardTile {
         BoardTile::new_unnamed(
@@ -88,13 +175,15 @@ impl BoardTile {
     }
 
     #[inline]
-    pub fn new_unnamed_non_bonus_land(mars_coordinates: (isize, isize)) -> BoardTile {
+    pub fn new_unnamed_non_bonus_land<CoordT: Into<Coordinates>>(
+        mars_coordinates: CoordT,
+    ) -> BoardTile {
         BoardTile::new_unnamed_land(mars_coordinates, vec![])
     }
 
     #[inline]
-    pub fn new_unnamed_resource_bonus_land(
-        mars_coordinates: (isize, isize),
+    pub fn new_unnamed_resource_bonus_land<CoordT: Into<Coordinates>>(
+        mars_coordinates: CoordT,
         resource: Resource,
         count: usize,
     ) -> BoardTile {
@@ -105,8 +194,8 @@ impl BoardTile {
     }
 
     #[inline]
-    pub fn new_unnamed_card_draw_land(
-        mars_coordinates: (isize, isize),
+    pub fn new_unnamed_card_draw_land<CoordT: Into<Coordinates>>(
+        mars_coordinates: CoordT,
         card_count: usize,
     ) -> BoardTile {
         BoardTile::new_unnamed_land(
@@ -116,8 +205,8 @@ impl BoardTile {
     }
 
     #[inline]
-    pub fn new_unnamed_ocean(
-        mars_coordinates: (isize, isize),
+    pub fn new_unnamed_ocean<CoordT: Into<Coordinates>>(
+        mars_coordinates: CoordT,
         placement_bonus: Vec<ImmediateImpact>,
     ) -> BoardTile {
         BoardTile::new_unnamed(
@@ -128,8 +217,8 @@ impl BoardTile {
     }
 
     #[inline]
-    pub fn new_unnamed_resource_bonus_ocean(
-        mars_coordinates: (isize, isize),
+    pub fn new_unnamed_resource_bonus_ocean<CoordT: Into<Coordinates>>(
+        mars_coordinates: CoordT,
         resource: Resource,
         count: usize,
     ) -> BoardTile {
@@ -140,8 +229,8 @@ impl BoardTile {
     }
 
     #[inline]
-    pub fn new_unnamed_card_draw_ocean(
-        mars_coordinates: (isize, isize),
+    pub fn new_unnamed_card_draw_ocean<CoordT: Into<Coordinates>>(
+        mars_coordinates: CoordT,
         card_count: usize,
     ) -> BoardTile {
         BoardTile::new_unnamed_ocean(
@@ -180,21 +269,11 @@ pub fn make_standard_game_board() -> MarsBoard {
     let oxygen = 0usize;
     let temperature = -30isize;
 
-    // Using implicit 3-axis "cube" coordinate system, with all points satisfying x + y + z = 0.
-    // We always drop the z coordinate, since it's implicitly z = -(x + y).
-    // Properties:
-    // - (0, 0) on the left-most hex of the center row.
-    // - Bottom left edge has x = 0. The x coordinate increases to the top-right.
-    // - Top left edge has y = 0. The y coordinate increases to the top-left.
-    // - Center row has z = 0. The z coordinate increases downward.
-    //
-    // Diagram at:
-    // https://www.redblobgames.com/grids/hexagons/
     let mut mars_tiles: Vec<BoardTile> = vec![
         // top-left edge = first top-rightward column
         BoardTile::new(
             Some("Arsia Mons".into()),
-            Some((0, 0)),
+            Some((0, 0).into()),
             vec![
                 TileDesignation::Land,
                 TileDesignation::Special(SpecialLocation::VolcanicArea),
@@ -203,7 +282,7 @@ pub fn make_standard_game_board() -> MarsBoard {
         ),
         BoardTile::new(
             Some("Pavonis Mons".into()),
-            Some((1, 0)),
+            Some((1, 0).into()),
             vec![
                 TileDesignation::Land,
                 TileDesignation::Special(SpecialLocation::VolcanicArea),
@@ -215,7 +294,7 @@ pub fn make_standard_game_board() -> MarsBoard {
         ),
         BoardTile::new(
             Some("Ascraeus Mons".into()),
-            Some((2, 0)),
+            Some((2, 0).into()),
             vec![
                 TileDesignation::Land,
                 TileDesignation::Special(SpecialLocation::VolcanicArea),
@@ -232,7 +311,7 @@ pub fn make_standard_game_board() -> MarsBoard {
         BoardTile::new_unnamed_non_bonus_land((3, -1)),
         BoardTile::new(
             Some("Tharsis Tholus".into()),
-            Some((4, -1)),
+            Some((4, -1).into()),
             vec![
                 TileDesignation::Land,
                 TileDesignation::Special(SpecialLocation::VolcanicArea),
@@ -246,7 +325,7 @@ pub fn make_standard_game_board() -> MarsBoard {
         BoardTile::new_unnamed_resource_bonus_land((1, -2), Resource::Plants, 2),
         BoardTile::new(
             Some("Noctis City".into()),
-            Some((2, -2)),
+            Some((2, -2).into()),
             vec![
                 TileDesignation::Land,
                 TileDesignation::Special(SpecialLocation::NoctisCity),
