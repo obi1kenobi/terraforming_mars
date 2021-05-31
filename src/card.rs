@@ -175,7 +175,7 @@ pub enum VictoryPointValue {
     Immediate(isize),
 
     PerCity(usize),    // N points per 1 city
-    PerNCities(usize), // 1 point per N cities
+    PerNCities(usize), // 1 point per N cities, regardless of who owns them
 
     // how many points, per how many tags/resources, of which kind
     PerTag(usize, usize, CardTag),

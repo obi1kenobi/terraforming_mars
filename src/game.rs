@@ -11,6 +11,9 @@ const DEFAULT_SOLO_STARTING_TERRAFORM_RATING: usize = 14;
 const DEFAULT_STEEL_VALUE: usize = 2;
 const DEFAULT_TITANIUM_VALUE: usize = 3;
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+pub struct PlayerId(usize);
+
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PlayerState {
     // primary data
