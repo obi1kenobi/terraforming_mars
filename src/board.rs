@@ -3,8 +3,8 @@ use std::collections::{HashMap, HashSet};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    card::{ImmediateImpact, SpecialLocation, SpecialTile},
-    game::PlayerId,
+    card::{CityKind, ImmediateImpact, LocationRestriction, SpecialLocation, SpecialTile},
+    game::{PlayerId, PlayerState},
     resource::Resource,
 };
 
@@ -132,16 +132,18 @@ impl From<EmptyLocation> for TileLocation {
 pub enum TileStatus {
     Empty(EmptyLocation),
     Ocean(TileLocation),
-    City(TileLocation, PlayerId),
+    City(TileLocation, CityKind, PlayerId),
     Greenery(TileLocation, PlayerId),
     SpecialTile(TileLocation, SpecialTile, PlayerId),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct MarsBoard {
+    pub board_name: String,
+
     pub spaces: HashMap<TileLocation, BoardSpace>,
 
-    pub cities: HashMap<TileLocation, PlayerId>,
+    pub cities: HashMap<TileLocation, (CityKind, PlayerId)>,
     pub oceans: HashSet<Coordinates>,
     pub greeneries: HashMap<Coordinates, PlayerId>,
     pub special_tiles: HashMap<Coordinates, (SpecialTile, PlayerId)>,
@@ -154,8 +156,9 @@ impl MarsBoard {
     const DEFAULT_OCEAN_ADJACENCY_MEGACREDITS: usize = 2;
 
     pub fn new(
+        board_name: String,
         spaces: HashMap<TileLocation, BoardSpace>,
-        cities: HashMap<TileLocation, PlayerId>,
+        cities: HashMap<TileLocation, (CityKind, PlayerId)>,
         oceans: HashSet<Coordinates>,
         greeneries: HashMap<Coordinates, PlayerId>,
         special_tiles: HashMap<Coordinates, (SpecialTile, PlayerId)>,
@@ -174,6 +177,7 @@ impl MarsBoard {
         );
 
         Self {
+            board_name,
             spaces,
             cities,
             oceans,
@@ -185,10 +189,9 @@ impl MarsBoard {
     }
 
     pub fn get_tile_status(&self, location: &TileLocation) -> TileStatus {
-        let city_status = self
-            .cities
-            .get(&location)
-            .map(|player_id| TileStatus::City(location.clone(), *player_id));
+        let city_status = self.cities.get(&location).map(|(city_kind, player_id)| {
+            TileStatus::City(location.clone(), *city_kind, *player_id)
+        });
         city_status.unwrap_or_else(|| {
             match &location {
                 TileLocation::OffMars(_) => {
@@ -235,10 +238,18 @@ impl MarsBoard {
     pub fn count_adjacent_oceans(&self, empty_location: &EmptyLocation) -> usize {
         let location = &empty_location.0;
 
+        self.get_neighbor_tile_status(location)
+            .filter(|status| matches!(status, TileStatus::Ocean(_)))
+            .count()
+    }
+
+    pub fn get_neighbor_tile_status<'a>(
+        &'a self,
+        location: &TileLocation,
+    ) -> impl Iterator<Item = TileStatus> + 'a {
         location
             .neighbors_within_bounds()
-            .filter(|neighbor| matches!(self.get_tile_status(neighbor), TileStatus::Ocean(_)))
-            .count()
+            .map(move |neighbor| self.get_tile_status(&neighbor))
     }
 
     pub fn get_placement_bonuses(&self, empty_location: &EmptyLocation) -> Vec<ImmediateImpact> {
@@ -282,6 +293,135 @@ impl MarsBoard {
         }
 
         placement_bonuses
+    }
+
+    pub fn can_place_city(
+        &mut self,
+        player: &mut PlayerState,
+        empty_location: EmptyLocation,
+        city_kind: CityKind,
+        location_restrictions: &[LocationRestriction],
+    ) -> Option<()> {
+        let location = &empty_location.0;
+
+        let mut adjacent_tiles_of_any_kind: usize = 0;
+        let mut adjacent_greeneries: usize = 0;
+        let mut adjacent_cities: usize = 0;
+        let mut adjacent_owned_tiles: usize = 0;
+
+        for status in self.get_neighbor_tile_status(location) {
+            if !matches!(status, TileStatus::Empty(_)) {
+                adjacent_tiles_of_any_kind += 1;
+            }
+
+            match status {
+                TileStatus::City(_, _, _) => {
+                    adjacent_cities += 1;
+                }
+                TileStatus::Greenery(_, _) => {
+                    adjacent_greeneries += 1;
+                }
+                TileStatus::Empty(_)
+                | TileStatus::Ocean(_)
+                | TileStatus::SpecialTile(_, _, _) => {}
+            }
+
+            adjacent_owned_tiles += match status {
+                TileStatus::City(_, _, owner_id)
+                | TileStatus::Greenery(_, owner_id)
+                | TileStatus::SpecialTile(_, _, owner_id) => {
+                    if owner_id == player.player_id {
+                        1
+                    } else {
+                        0
+                    }
+                }
+                _ => 0,
+            }
+        }
+
+        let board_space = self.spaces.get(location).unwrap();
+        for restriction in location_restrictions {
+            match restriction {
+                LocationRestriction::LandTile => {
+                    let board_space = self.spaces.get(location).unwrap();
+                    if !board_space.is_land() {
+                        return None;
+                    }
+                },
+                LocationRestriction::ReservedForOcean => {
+                    if !board_space.is_reserved_for_ocean() {
+                        return None;
+                    }
+                },
+                LocationRestriction::OnSteelOrTitaniumPlacementBonus => {
+                    let is_on_metal_placement_bonus = board_space.placement_bonus
+                        .iter()
+                        .filter(|impact| {
+                            matches!(
+                                impact,
+                                ImmediateImpact::GainResource(Resource::Steel, _)
+                                | ImmediateImpact::GainResource(Resource::Titanium, _)
+                            )
+                        })
+                        .next()
+                        .is_some();
+                    if !is_on_metal_placement_bonus {
+                        return None;
+                    }
+                },
+                LocationRestriction::AtSpecialLocation(special_location) => {
+                    // TODO: Handle placing volcanic area city / Noctis City
+                    //       on maps that don't have such tiles.
+                    let has_matching_designation = board_space.designations
+                        .iter()
+                        .filter(|d| matches!(d, Designation::Special(s) if s == special_location))
+                        .next()
+                        .is_some();
+                    if !has_matching_designation {
+                        return None;
+                    }
+                }
+                LocationRestriction::AdjacentToOwnedTile => {
+                    if adjacent_owned_tiles == 0 {
+                        return None;
+                    }
+                }
+                LocationRestriction::AdjacentToOwnedTileIfAble => unimplemented!(),
+                LocationRestriction::NotNextToAnyOtherTile => {
+                    if adjacent_tiles_of_any_kind > 0 {
+                        return None;
+                    }
+                }
+                LocationRestriction::NotNextToACity => {
+                    if adjacent_cities > 0 {
+                        return None;
+                    }
+                }
+                LocationRestriction::NextToACity => {
+                    if adjacent_cities < 1 {
+                        return None;
+                    }
+                }
+                LocationRestriction::NextToAtLeastTwoCities => {
+                    if adjacent_cities < 2 {
+                        return None;
+                    }
+                }
+                LocationRestriction::NextToAGreenery => {
+                    if adjacent_greeneries < 1 {
+                        return None;
+                    }
+                }
+            }
+        }
+
+        let existing_tile = self
+            .cities
+            .insert(empty_location.0, (city_kind, player.player_id));
+        assert!(existing_tile.is_none());
+
+        Some(())
     }
 }
 
@@ -404,6 +544,24 @@ impl BoardSpace {
             vec![ImmediateImpact::DrawCard(card_count)],
         )
     }
+
+    #[inline]
+    pub fn is_land(&self) -> bool {
+        self.designations
+            .iter()
+            .filter(|d| matches!(d, Designation::Land))
+            .next()
+            .is_some()
+    }
+
+    #[inline]
+    pub fn is_reserved_for_ocean(&self) -> bool {
+        self.designations
+            .iter()
+            .filter(|d| matches!(d, Designation::ReservedForOcean))
+            .next()
+            .is_some()
+    }
 }
 
 pub fn make_standard_non_mars_board_spaces() -> Vec<BoardSpace> {
@@ -429,7 +587,8 @@ pub fn make_standard_non_mars_board_spaces() -> Vec<BoardSpace> {
     ]
 }
 
-pub fn make_standard_game_board() -> MarsBoard {
+pub fn make_base_game_board() -> MarsBoard {
+    let board_name = "Tharsis".into();
     let oxygen = 0usize;
     let temperature = -30isize;
 
@@ -559,6 +718,7 @@ pub fn make_standard_game_board() -> MarsBoard {
     ]);
 
     MarsBoard::new(
+        board_name,
         spaces
             .drain(..)
             .map(|tile| (tile.location.clone(), tile))

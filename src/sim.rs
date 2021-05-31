@@ -104,7 +104,7 @@ mod tests {
 
     #[test]
     fn get_possible_plays_when_no_card_buys_or_plays_exist() {
-        let player_state = PlayerStateBuilder::new()
+        let player_state = PlayerStateBuilder::new(1)
             .with_resources(2, 0, 0, 0, 0, 0)
             .build();
 
@@ -115,7 +115,7 @@ mod tests {
             BASE_GAME_CARDS_BY_NAME["GHG Factories"],
         ];
 
-        let opponent_state = PlayerStateBuilder::new().build();
+        let opponent_state = PlayerStateBuilder::new(2).build();
         let opponent_states = vec![&opponent_state];
 
         let expected_plays: Vec<(Vec<Card>, Vec<TurnAction>, PlayerState)> = vec![

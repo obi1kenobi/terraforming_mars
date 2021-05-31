@@ -3,7 +3,11 @@ use std::collections::{BTreeMap, HashSet};
 use maplit::btreemap;
 use serde::{Deserialize, Serialize};
 
-use crate::{card::{Card, CardAction, CardEffect, CardKind, CardTag, VictoryPointValue}, resource::{CardResource, PaymentCost, Resource}};
+use crate::{
+    board::MarsBoard,
+    card::{Card, CardAction, CardEffect, CardKind, CardTag, VictoryPointValue},
+    resource::{CardResource, PaymentCost, Resource},
+};
 
 const CARD_PURCHASE_COST: usize = 3;
 const DEFAULT_STARTING_TERRAFORM_RATING: usize = 20;
@@ -11,12 +15,13 @@ const DEFAULT_SOLO_STARTING_TERRAFORM_RATING: usize = 14;
 const DEFAULT_STEEL_VALUE: usize = 2;
 const DEFAULT_TITANIUM_VALUE: usize = 3;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct PlayerId(usize);
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PlayerState {
     // primary data
+    pub player_id: PlayerId,
     pub resources: BTreeMap<Resource, usize>,
     pub production: BTreeMap<Resource, isize>,
     pub played_cards: Vec<Card>,
@@ -26,14 +31,13 @@ pub struct PlayerState {
     pub terraform_rating: usize,
     pub steel_value: usize,
     pub titanium_value: usize,
-    pub city_count: usize,
 
     // indexes of primary data
     pub effects: Vec<CardEffect>,
-    pub current_total_points: isize, // total victory points from all sources: cards, TR, etc.
 }
 
 pub struct PlayerStateBuilder {
+    pub player_id: PlayerId,
     pub resources: Option<BTreeMap<Resource, usize>>,
     pub production: Option<BTreeMap<Resource, isize>>,
     pub played_cards: Option<Vec<Card>>,
@@ -41,12 +45,12 @@ pub struct PlayerStateBuilder {
     pub tapped_active_cards: Option<HashSet<Card>>,
     pub cards_in_hand: Option<Vec<Card>>,
     pub terraform_rating: usize,
-    pub city_count: usize,
 }
 
 impl PlayerStateBuilder {
-    pub fn new() -> PlayerStateBuilder {
+    pub fn new(player_id: usize) -> PlayerStateBuilder {
         PlayerStateBuilder {
+            player_id: PlayerId(player_id),
             resources: None,
             production: None,
             played_cards: None,
@@ -54,13 +58,7 @@ impl PlayerStateBuilder {
             tapped_active_cards: None,
             cards_in_hand: None,
             terraform_rating: DEFAULT_STARTING_TERRAFORM_RATING,
-            city_count: 0,
         }
-    }
-
-    pub fn with_cities(mut self, city_count: usize) -> PlayerStateBuilder {
-        self.city_count = city_count;
-        self
     }
 
     pub fn with_played_cards(mut self, played_cards: Vec<Card>) -> PlayerStateBuilder {
@@ -123,7 +121,6 @@ impl PlayerStateBuilder {
     }
 
     pub fn build(self) -> PlayerState {
-        let city_count = self.city_count;
         let card_resources = self.card_resources;
 
         let resources = self.resources.unwrap_or_else(|| {
@@ -148,50 +145,6 @@ impl PlayerStateBuilder {
             }
         });
 
-        let mut current_total_points = self.terraform_rating as isize;
-        let card_points: isize = self
-            .played_cards
-            .as_ref()
-            .map(|cards| {
-                cards
-                    .iter()
-                    .map(|c| match c.points {
-                        Some(VictoryPointValue::Immediate(x)) => x,
-                        Some(VictoryPointValue::PerTag(vp, count, tag)) => {
-                            assert!(tag != CardTag::Event);
-
-                            let tag_count = cards.active_tag_count(tag);
-                            ((tag_count / count) * vp) as isize
-                        }
-                        Some(VictoryPointValue::PerCardResource(vp, count, cr)) => {
-                            let resources_present = card_resources.get(&(c.clone(), cr)).copied().unwrap_or_default();
-
-                            ((resources_present / count) * vp) as isize
-                        }
-                        Some(VictoryPointValue::FixedPointsIfAnyCardResourcePresent(
-                            count,
-                            cr,
-                        )) => {
-                            let resources_present = card_resources.get(&(c.clone(), cr)).copied().unwrap_or_default();
-                            if resources_present > 0 {
-                                count as isize
-                            } else {
-                                0
-                            }
-                        }
-                        Some(VictoryPointValue::PerCity(vp)) => {
-                            (city_count * vp) as isize
-                        }
-                        Some(VictoryPointValue::PerNCities(n_cities)) => {
-                            (city_count / n_cities) as isize
-                        }
-                        None => 0,
-                    })
-                    .sum()
-            })
-            .unwrap_or_default();
-        current_total_points += card_points;
-
         let effects: Vec<_> = self
             .played_cards
             .as_ref()
@@ -211,6 +164,7 @@ impl PlayerStateBuilder {
         }
 
         PlayerState {
+            player_id: self.player_id,
             resources,
             production,
             played_cards: self.played_cards.unwrap_or_default(),
@@ -220,16 +174,8 @@ impl PlayerStateBuilder {
             terraform_rating: self.terraform_rating,
             steel_value: steel_value,
             titanium_value: titanium_value,
-            city_count: self.city_count,
             effects: effects,
-            current_total_points: current_total_points,
         }
-    }
-}
-
-impl Default for PlayerStateBuilder {
-    fn default() -> Self {
-        Self::new()
     }
 }
 
@@ -285,6 +231,51 @@ impl PlayerState {
             );
             Some(())
         }
+    }
+
+    pub fn get_total_victory_points(&self, board: &MarsBoard) -> isize {
+        let mut current_total_points = self.terraform_rating as isize;
+        let card_points: isize = self
+            .played_cards
+            .iter()
+            .map(|c| match c.points {
+                Some(VictoryPointValue::Immediate(x)) => x,
+                Some(VictoryPointValue::PerTag(vp, count, tag)) => {
+                    assert!(tag != CardTag::Event);
+
+                    let tag_count = self.played_cards.active_tag_count(tag);
+                    ((tag_count / count) * vp) as isize
+                }
+                Some(VictoryPointValue::PerCardResource(vp, count, cr)) => {
+                    let resources_present = self
+                        .card_resources
+                        .get(&(c.clone(), cr))
+                        .copied()
+                        .unwrap_or_default();
+
+                    ((resources_present / count) * vp) as isize
+                }
+                Some(VictoryPointValue::FixedPointsIfAnyCardResourcePresent(count, cr)) => {
+                    let resources_present = self
+                        .card_resources
+                        .get(&(c.clone(), cr))
+                        .copied()
+                        .unwrap_or_default();
+                    if resources_present > 0 {
+                        count as isize
+                    } else {
+                        0
+                    }
+                }
+                Some(VictoryPointValue::PerNCities(n_cities)) => {
+                    (board.cities.len() / n_cities) as isize
+                }
+                None => 0,
+            })
+            .sum();
+        current_total_points += card_points;
+
+        current_total_points
     }
 
     pub fn can_play_card(&self, index_in_hand: usize) -> Option<PaymentCost> {
@@ -388,27 +379,89 @@ pub enum PlayerTurn {
 
 #[cfg(test)]
 mod tests {
-    use crate::game::DEFAULT_STARTING_TERRAFORM_RATING;
-    use crate::game::PlayerStateBuilder;
+    use crate::board::make_base_game_board;
+    use crate::board::Coordinates;
+    use crate::board::TileLocation;
+    use crate::card::CityKind;
+    use crate::card::SpecialLocation;
     use crate::card::BASE_GAME_CARDS_BY_NAME;
+    use crate::game::PlayerStateBuilder;
+    use crate::game::DEFAULT_STARTING_TERRAFORM_RATING;
 
     #[test]
     fn test_victory_points_from_tags_count_own_card_tags() {
         let played_cards: Vec<_> = [
-            BASE_GAME_CARDS_BY_NAME["Ganymede Colony"],           // Jovian + 1VP/Jovian
-            BASE_GAME_CARDS_BY_NAME["Water Import From Europa"],  // Jovian + 1VP/Jovian
-            BASE_GAME_CARDS_BY_NAME["Methane From Titan"],        // Jovian + 2VP immediate
-            BASE_GAME_CARDS_BY_NAME["Tundra Farming"],            // 2VP immediate, not Jovian
-        ].iter().copied().cloned().collect();
+            BASE_GAME_CARDS_BY_NAME["Ganymede Colony"], // Jovian + 1VP/Jovian
+            BASE_GAME_CARDS_BY_NAME["Water Import From Europa"], // Jovian + 1VP/Jovian
+            BASE_GAME_CARDS_BY_NAME["Methane From Titan"], // Jovian + 2VP immediate
+            BASE_GAME_CARDS_BY_NAME["Tundra Farming"],  // 2VP immediate, not Jovian
+        ]
+        .iter()
+        .copied()
+        .cloned()
+        .collect();
 
-        let player_state = PlayerStateBuilder::new()
+        let player_state = PlayerStateBuilder::new(1)
             .with_played_cards(played_cards)
             .build();
+
+        let board = make_base_game_board();
 
         // cards are worth 10 points:
         // 3 Jovian tags valued at 2VP per Jovian card + 4VP immediate
         let points_from_cards: isize = 10;
         let expected_points = (DEFAULT_STARTING_TERRAFORM_RATING as isize) + points_from_cards;
-        assert_eq!(expected_points, player_state.current_total_points);
+        assert_eq!(
+            expected_points,
+            player_state.get_total_victory_points(&board)
+        );
+    }
+
+    #[test]
+    fn test_per_city_victory_points_count_all_player_cities_both_on_and_off_mars() {
+        let p1_played_cards: Vec<_> = [BASE_GAME_CARDS_BY_NAME["Immigration Shuttles"]]
+            .iter()
+            .copied()
+            .cloned()
+            .collect();
+
+        let p2_played_cards: Vec<_> = [BASE_GAME_CARDS_BY_NAME["Ganymede Colony"]]
+            .iter()
+            .copied()
+            .cloned()
+            .collect();
+
+        let p1_player_state = PlayerStateBuilder::new(1)
+            .with_played_cards(p1_played_cards)
+            .build();
+        let p2_player_state = PlayerStateBuilder::new(2)
+            .with_played_cards(p2_played_cards)
+            .build();
+
+        let mut board = make_base_game_board();
+        board.cities.insert(
+            TileLocation::OnMars(Coordinates::new(0, 0)),
+            (CityKind::RegularCity, p1_player_state.player_id),
+        );
+        board.cities.insert(
+            TileLocation::OffMars(SpecialLocation::GanymedeColony),
+            (CityKind::GanymedeColony, p2_player_state.player_id),
+        );
+        board.cities.insert(
+            TileLocation::OnMars(Coordinates::new(5, -3)),
+            (CityKind::RegularCity, p2_player_state.player_id),
+        );
+
+        // 1VP from immigration shuttles because of 3 cities in existence
+        assert_eq!(
+            1 + DEFAULT_STARTING_TERRAFORM_RATING as isize,
+            p1_player_state.get_total_victory_points(&board)
+        );
+
+        // 1VP from Ganymede Colony's Jovian tag
+        assert_eq!(
+            1 + DEFAULT_STARTING_TERRAFORM_RATING as isize,
+            p2_player_state.get_total_victory_points(&board)
+        );
     }
 }

@@ -144,7 +144,7 @@ pub enum SpecialLocation {
     VolcanicArea,
 }
 
-#[derive(Clone, Debug, PartialOrd, Ord, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialOrd, Ord, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum CityKind {
     RegularCity,
     Capital,          // regular city + scores 1VP per adjacent ocean
@@ -156,7 +156,7 @@ pub enum CityKind {
     ResearchOutpost,  // placed next to no other tile
 }
 
-#[derive(Clone, Debug, PartialOrd, Ord, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialOrd, Ord, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum SpecialTile {
     NuclearZone,
     RestrictedArea,
@@ -174,7 +174,6 @@ pub enum SpecialTile {
 pub enum VictoryPointValue {
     Immediate(isize),
 
-    PerCity(usize),    // N points per 1 city
     PerNCities(usize), // 1 point per N cities, regardless of who owns them
 
     // how many points, per how many tags/resources, of which kind
