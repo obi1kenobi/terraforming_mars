@@ -111,8 +111,26 @@ impl TileLocation {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[repr(transparent)]
+pub struct EmptyLocation(TileLocation);
+
+impl From<TileLocation> for EmptyLocation {
+    #[inline]
+    fn from(location: TileLocation) -> Self {
+        Self(location)
+    }
+}
+
+impl From<EmptyLocation> for TileLocation {
+    #[inline]
+    fn from(empty_location: EmptyLocation) -> Self {
+        empty_location.0
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum TileStatus {
-    Empty(TileLocation),
+    Empty(EmptyLocation),
     Ocean(TileLocation),
     City(TileLocation, PlayerId),
     Greenery(TileLocation, PlayerId),
@@ -133,6 +151,8 @@ pub struct MarsBoard {
 }
 
 impl MarsBoard {
+    const DEFAULT_OCEAN_ADJACENCY_MEGACREDITS: usize = 2;
+
     pub fn new(
         spaces: HashMap<TileLocation, BoardSpace>,
         cities: HashMap<TileLocation, PlayerId>,
@@ -164,7 +184,7 @@ impl MarsBoard {
         }
     }
 
-    pub fn get_tile_status(&self, location: TileLocation) -> TileStatus {
+    pub fn get_tile_status(&self, location: &TileLocation) -> TileStatus {
         let city_status = self
             .cities
             .get(&location)
@@ -177,7 +197,7 @@ impl MarsBoard {
                     // - There is no city at the given location.
                     // Since the only things that can be placed off Mars are cities,
                     // we know that the tile status for that location must be empty.
-                    TileStatus::Empty(location)
+                    TileStatus::Empty(location.clone().into())
                 }
                 TileLocation::OnMars(coordinates) => {
                     let ocean_status = self
@@ -196,15 +216,72 @@ impl MarsBoard {
                                 self.special_tiles
                                     .get(coordinates)
                                     .map(|(tile, player_id)| {
-                                        TileStatus::SpecialTile(location.clone(), tile.clone(), *player_id)
+                                        TileStatus::SpecialTile(
+                                            location.clone(),
+                                            tile.clone(),
+                                            *player_id,
+                                        )
                                     });
 
-                            special_tile_status.unwrap_or_else(|| TileStatus::Empty(location.clone()))
+                            special_tile_status
+                                .unwrap_or_else(|| TileStatus::Empty(location.clone().into()))
                         })
                     })
                 }
             }
         })
+    }
+
+    pub fn count_adjacent_oceans(&self, empty_location: &EmptyLocation) -> usize {
+        let location = &empty_location.0;
+
+        location
+            .neighbors_within_bounds()
+            .filter(|neighbor| matches!(self.get_tile_status(neighbor), TileStatus::Ocean(_)))
+            .count()
+    }
+
+    pub fn get_placement_bonuses(&self, empty_location: &EmptyLocation) -> Vec<ImmediateImpact> {
+        let adjacent_oceans = self.count_adjacent_oceans(empty_location);
+        let ocean_adjacency_megacredits =
+            adjacent_oceans * Self::DEFAULT_OCEAN_ADJACENCY_MEGACREDITS;
+
+        let board_space = self
+            .spaces
+            .get(&empty_location.0)
+            .expect("Tile location did not existon this board.");
+        let mut placement_bonuses = board_space.placement_bonus.clone();
+
+        let mut coalesced = false;
+        for bonus in placement_bonuses.iter_mut() {
+            let total_megacredits = match bonus {
+                &mut ImmediateImpact::GainResource(Resource::Megacredits, megacredits) => {
+                    Some(megacredits + ocean_adjacency_megacredits)
+                }
+                _ => None,
+            };
+
+            match total_megacredits {
+                Some(megacredits) => {
+                    coalesced = true;
+                    bonus.clone_from(&ImmediateImpact::GainResource(
+                        Resource::Megacredits,
+                        megacredits,
+                    ));
+                    break;
+                }
+                _ => {}
+            }
+        }
+
+        if !coalesced {
+            placement_bonuses.push(ImmediateImpact::GainResource(
+                Resource::Megacredits,
+                ocean_adjacency_megacredits,
+            ));
+        }
+
+        placement_bonuses
     }
 }
 
