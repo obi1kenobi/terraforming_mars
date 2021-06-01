@@ -3,11 +3,7 @@ use std::collections::{BTreeMap, HashSet};
 use maplit::btreemap;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    board::MarsBoard,
-    card::{Card, CardAction, CardEffect, CardKind, CardTag, VictoryPointValue},
-    resource::{CardResource, PaymentCost, Resource},
-};
+use crate::{board::{MarsBoard, TileStatus}, card::{Card, CardAction, CardEffect, CardKind, CardTag, CityKind, VictoryPointValue}, resource::{CardResource, PaymentCost, Resource}};
 
 const CARD_PURCHASE_COST: usize = 3;
 const DEFAULT_STARTING_TERRAFORM_RATING: usize = 20;
@@ -275,6 +271,34 @@ impl PlayerState {
             .sum();
         current_total_points += card_points;
 
+        let greenery_points = board
+            .greeneries
+            .values()
+            .filter(|player_id| **player_id == self.player_id)
+            .count();
+        current_total_points += greenery_points as isize;
+
+        let city_points: usize = board
+            .cities
+            .iter()
+            .filter(|(_, (_, player_id))| *player_id == self.player_id)
+            .map(|(location, (city_kind, _))| {
+                let capital_points = if matches!(city_kind, CityKind::Capital) {
+                    board.get_neighbor_tile_status(location).filter(|status| matches!(status, &TileStatus::Ocean(_))).count()
+                } else {
+                    0
+                };
+
+                let greenery_adjacency_points = board
+                    .get_neighbor_tile_status(location)
+                    .filter(|status| matches!(status, &TileStatus::Greenery(_, _)))
+                    .count();
+
+                capital_points + greenery_adjacency_points
+            })
+            .sum();
+        current_total_points += city_points as isize;
+
         current_total_points
     }
 
@@ -461,6 +485,84 @@ mod tests {
         // 1VP from Ganymede Colony's Jovian tag
         assert_eq!(
             1 + DEFAULT_STARTING_TERRAFORM_RATING as isize,
+            p2_player_state.get_total_victory_points(&board)
+        );
+    }
+
+    #[test]
+    fn test_city_and_greneery_scoring() {
+        let p1_player_state = PlayerStateBuilder::new(1)
+            .build();
+        let p2_player_state = PlayerStateBuilder::new(2)
+            .build();
+
+        let mut board = make_base_game_board();
+        board.cities.insert(
+            TileLocation::OnMars(Coordinates::new(0, 0)),
+            (CityKind::RegularCity, p1_player_state.player_id),
+        );
+        board.greeneries.insert(
+            Coordinates::new(1, 0),
+            p1_player_state.player_id,
+        );
+        board.greeneries.insert(
+            Coordinates::new(1, -1),
+            p2_player_state.player_id,
+        );
+
+        // 1VP from the greenery, 2VP from the city adjacent to 2 greeneries
+        assert_eq!(
+            3 + DEFAULT_STARTING_TERRAFORM_RATING as isize,
+            p1_player_state.get_total_victory_points(&board)
+        );
+
+        // 1VP from the greenery
+        assert_eq!(
+            1 + DEFAULT_STARTING_TERRAFORM_RATING as isize,
+            p2_player_state.get_total_victory_points(&board)
+        );
+    }
+
+    #[test]
+    fn test_capital_city_scoring() {
+        let p1_played_cards: Vec<_> = [BASE_GAME_CARDS_BY_NAME["Capital"]]
+            .iter()
+            .copied()
+            .cloned()
+            .collect();
+
+        let p1_player_state = PlayerStateBuilder::new(1)
+            .with_played_cards(p1_played_cards)
+            .build();
+        let p2_player_state = PlayerStateBuilder::new(2)
+            .build();
+
+        let mut board = make_base_game_board();
+        board.cities.insert(
+            TileLocation::OnMars(Coordinates::new(4, -5)),
+            (CityKind::Capital, p1_player_state.player_id),
+        );
+        board.greeneries.insert(
+            Coordinates::new(3, -5),
+            p2_player_state.player_id,
+        );
+        board.greeneries.insert(
+            Coordinates::new(4, -6),
+            p2_player_state.player_id,
+        );
+        board.oceans.insert(Coordinates::new(5, -5));
+        board.oceans.insert(Coordinates::new(5, -6));
+        board.oceans.insert(Coordinates::new(4, -4));
+
+        // 3VP from the oceans adjacent to the capital, 2VP from the adjacent greeneries
+        assert_eq!(
+            5 + DEFAULT_STARTING_TERRAFORM_RATING as isize,
+            p1_player_state.get_total_victory_points(&board)
+        );
+
+        // 2VP from the greeneries
+        assert_eq!(
+            2 + DEFAULT_STARTING_TERRAFORM_RATING as isize,
             p2_player_state.get_total_victory_points(&board)
         );
     }
