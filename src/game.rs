@@ -3,7 +3,14 @@ use std::collections::{BTreeMap, HashSet};
 use maplit::btreemap;
 use serde::{Deserialize, Serialize};
 
-use crate::{board::{MarsBoard, TileStatus}, card::{Card, CardAction, CardEffect, CardKind, CardTag, CityKind, VictoryPointValue}, resource::{CardResource, PaymentCost, Resource}};
+use crate::{
+    board::{MarsBoard, TileStatus},
+    card::{
+        Card, CardAction, CardEffect, CardKind, CardRequirement, CardTag, CityKind,
+        VictoryPointValue,
+    },
+    resource::{CardResource, PaymentCost, Resource},
+};
 
 const CARD_PURCHASE_COST: usize = 3;
 const DEFAULT_STARTING_TERRAFORM_RATING: usize = 20;
@@ -284,7 +291,10 @@ impl PlayerState {
             .filter(|(_, (_, player_id))| *player_id == self.player_id)
             .map(|(location, (city_kind, _))| {
                 let capital_points = if matches!(city_kind, CityKind::Capital) {
-                    board.get_neighbor_tile_status(location).filter(|status| matches!(status, &TileStatus::Ocean(_))).count()
+                    board
+                        .get_neighbor_tile_status(location)
+                        .filter(|status| matches!(status, &TileStatus::Ocean(_)))
+                        .count()
                 } else {
                     0
                 };
@@ -302,9 +312,40 @@ impl PlayerState {
         current_total_points
     }
 
-    pub fn can_play_card(&self, index_in_hand: usize) -> Option<PaymentCost> {
+    pub fn can_play_card(&self, board: &MarsBoard, index_in_hand: usize) -> Option<PaymentCost> {
         let card = &self.cards_in_hand[index_in_hand];
         let megacredits_balance = self.resources[&Resource::Megacredits];
+
+        let fails_requirements = card
+            .requirements
+            .iter()
+            .filter(|requirement| match requirement {
+                // TODO: check for requirements-easing effect
+                CardRequirement::MaxOxygen(max_oxygen) => board.oxygen <= *max_oxygen,
+                CardRequirement::MinOxygen(min_oxygen) => board.oxygen >= *min_oxygen,
+                CardRequirement::MaxTemperature(max_temp) => board.temperature <= *max_temp,
+                CardRequirement::MinTemperature(min_temp) => board.temperature >= *min_temp,
+                CardRequirement::MaxOceans(max_oceans) => board.oceans.len() <= *max_oceans,
+                CardRequirement::MinOceans(min_oceans) => board.oceans.len() >= *min_oceans,
+                CardRequirement::MinOwnedGreeneries(min_greeneries) => {
+                    let owned_greeneries = board
+                        .greeneries
+                        .values()
+                        .filter(|player_id| self.player_id == **player_id)
+                        .count();
+
+                    owned_greeneries >= *min_greeneries
+                }
+                CardRequirement::MinTags(tag, count) => self.active_tag_count(*tag) >= *count,
+                CardRequirement::MinProduction(resource, amount) => {
+                    *self.production.get(resource).unwrap() >= (*amount as isize)
+                }
+            })
+            .next()
+            .is_some();
+        if fails_requirements {
+            return None;
+        }
 
         let can_pay = match &card.cost {
             PaymentCost::Megacredits(x) => *x <= megacredits_balance,
@@ -329,13 +370,11 @@ impl PlayerState {
             _ => unreachable!(),
         };
 
-        let satisfies_requirements = true; // TODO: implement me
-
-        if satisfies_requirements && can_pay {
+        if !can_pay {
+            None
+        } else {
             let cloned_cost = card.cost.clone();
             Some(cloned_cost)
-        } else {
-            None
         }
     }
 
@@ -491,24 +530,20 @@ mod tests {
 
     #[test]
     fn test_city_and_greneery_scoring() {
-        let p1_player_state = PlayerStateBuilder::new(1)
-            .build();
-        let p2_player_state = PlayerStateBuilder::new(2)
-            .build();
+        let p1_player_state = PlayerStateBuilder::new(1).build();
+        let p2_player_state = PlayerStateBuilder::new(2).build();
 
         let mut board = make_base_game_board();
         board.cities.insert(
             TileLocation::OnMars(Coordinates::new(0, 0)),
             (CityKind::RegularCity, p1_player_state.player_id),
         );
-        board.greeneries.insert(
-            Coordinates::new(1, 0),
-            p1_player_state.player_id,
-        );
-        board.greeneries.insert(
-            Coordinates::new(1, -1),
-            p2_player_state.player_id,
-        );
+        board
+            .greeneries
+            .insert(Coordinates::new(1, 0), p1_player_state.player_id);
+        board
+            .greeneries
+            .insert(Coordinates::new(1, -1), p2_player_state.player_id);
 
         // 1VP from the greenery, 2VP from the city adjacent to 2 greeneries
         assert_eq!(
@@ -534,22 +569,19 @@ mod tests {
         let p1_player_state = PlayerStateBuilder::new(1)
             .with_played_cards(p1_played_cards)
             .build();
-        let p2_player_state = PlayerStateBuilder::new(2)
-            .build();
+        let p2_player_state = PlayerStateBuilder::new(2).build();
 
         let mut board = make_base_game_board();
         board.cities.insert(
             TileLocation::OnMars(Coordinates::new(4, -5)),
             (CityKind::Capital, p1_player_state.player_id),
         );
-        board.greeneries.insert(
-            Coordinates::new(3, -5),
-            p2_player_state.player_id,
-        );
-        board.greeneries.insert(
-            Coordinates::new(4, -6),
-            p2_player_state.player_id,
-        );
+        board
+            .greeneries
+            .insert(Coordinates::new(3, -5), p2_player_state.player_id);
+        board
+            .greeneries
+            .insert(Coordinates::new(4, -6), p2_player_state.player_id);
         board.oceans.insert(Coordinates::new(5, -5));
         board.oceans.insert(Coordinates::new(5, -6));
         board.oceans.insert(Coordinates::new(4, -4));

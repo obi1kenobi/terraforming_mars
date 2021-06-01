@@ -1,9 +1,7 @@
-use crate::{
-    card::Card,
-    game::{PlayerState, TurnAction},
-};
+use crate::{board::MarsBoard, card::Card, game::{PlayerState, TurnAction}};
 
 pub fn get_possible_generation_plays(
+    board: &MarsBoard,
     initial_state: &PlayerState,
     opponent_states: &Vec<&PlayerState>,
     offered_cards: Vec<Card>,
@@ -26,7 +24,7 @@ pub fn get_possible_generation_plays(
         match current_state.purchase_cards(&purchased_cards) {
             None => continue,
             Some(_) => {
-                let mut possible_plays = make_all_possible_plays(&current_state, opponent_states);
+                let mut possible_plays = make_all_possible_plays(board, &current_state, opponent_states);
 
                 result.extend(possible_plays.drain(..).map(|(turns, final_state)| {
                     (
@@ -43,6 +41,7 @@ pub fn get_possible_generation_plays(
 }
 
 fn make_all_possible_plays(
+    board: &MarsBoard,
     initial_state: &PlayerState,
     opponent_states: &Vec<&PlayerState>,
 ) -> Vec<(Vec<TurnAction>, PlayerState)> {
@@ -50,6 +49,7 @@ fn make_all_possible_plays(
 
     make_all_possible_plays_recursively(
         &mut next_card_index_to_consider,
+        board,
         initial_state,
         opponent_states,
     )
@@ -57,6 +57,7 @@ fn make_all_possible_plays(
 
 fn make_all_possible_plays_recursively(
     next_card_index_to_consider: &mut usize,
+    board: &MarsBoard,
     initial_state: &PlayerState,
     opponent_states: &Vec<&PlayerState>,
 ) -> Vec<(Vec<TurnAction>, PlayerState)> {
@@ -70,7 +71,7 @@ fn make_all_possible_plays_recursively(
         Some(card) => {
             let state = initial_state.clone();
 
-            let play_vector = match state.can_play_card(*next_card_index_to_consider) {
+            let play_vector = match state.can_play_card(board, *next_card_index_to_consider) {
                 None => {
                     vec![]
                 }
@@ -83,6 +84,7 @@ fn make_all_possible_plays_recursively(
             *next_card_index_to_consider += 1;
             for (mut moves, final_state) in make_all_possible_plays_recursively(
                 next_card_index_to_consider,
+                board,
                 &state,
                 opponent_states,
             ) {
@@ -99,11 +101,13 @@ fn make_all_possible_plays_recursively(
 
 #[cfg(test)]
 mod tests {
-    use crate::{card::{BASE_GAME_CARDS_BY_NAME, Card}, game::{PlayerState, TurnAction}, sim::get_possible_generation_plays};
+    use crate::{board::make_base_game_board, card::{BASE_GAME_CARDS_BY_NAME, Card}, game::{PlayerState, TurnAction}, sim::get_possible_generation_plays};
     use crate::game::PlayerStateBuilder;
 
     #[test]
     fn get_possible_plays_when_no_card_buys_or_plays_exist() {
+        let board = make_base_game_board();
+
         let player_state = PlayerStateBuilder::new(1)
             .with_resources(2, 0, 0, 0, 0, 0)
             .build();
@@ -123,7 +127,11 @@ mod tests {
         ];
 
         let actual_plays = get_possible_generation_plays(
-            &player_state, &opponent_states, offered_cards.iter().copied().cloned().collect());
+            &board,
+            &player_state,
+            &opponent_states,
+            offered_cards.iter().copied().cloned().collect(),
+        );
 
         assert_eq!(expected_plays, actual_plays);
     }
