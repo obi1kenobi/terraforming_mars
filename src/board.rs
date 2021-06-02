@@ -188,6 +188,44 @@ impl MarsBoard {
         }
     }
 
+    pub fn increase_temperature(&mut self, player: &mut PlayerState) -> Option<ImmediateImpact> {
+        assert!(self.temperature <= 8);
+        assert!(self.temperature >= -30);
+        assert_eq!(self.temperature % 2, 0);
+
+        if self.temperature == 8 {
+            None
+        } else {
+            self.temperature += 2;
+            player.terraform_rating += 1;
+
+            if self.temperature == -24 || self.temperature == -20 {
+                Some(ImmediateImpact::GainProduction(Resource::Heat, 1))
+            } else if self.temperature == 0 {
+                Some(ImmediateImpact::PlaceOcean(vec![LocationRestriction::ReservedForOcean]))
+            } else {
+                None
+            }
+        }
+    }
+
+    pub fn increase_oxygen(&mut self, player: &mut PlayerState) -> Option<ImmediateImpact> {
+        assert!(self.oxygen <= 14);
+
+        if self.oxygen == 14 {
+            None
+        } else {
+            self.oxygen += 1;
+            player.terraform_rating += 1;
+
+            if self.oxygen == 8 {
+                Some(ImmediateImpact::RaiseTemperature)
+            } else {
+                None
+            }
+        }
+    }
+
     pub fn get_tile_status(&self, location: &TileLocation) -> TileStatus {
         let city_status = self.cities.get(&location).map(|(city_kind, player_id)| {
             TileStatus::City(location.clone(), *city_kind, *player_id)
