@@ -357,15 +357,13 @@ impl MarsBoard {
                 LocationRestriction::OnSteelOrTitaniumPlacementBonus => {
                     let is_on_metal_placement_bonus = board_space.placement_bonus
                         .iter()
-                        .filter(|impact| {
+                        .any(|impact| {
                             matches!(
                                 impact,
                                 ImmediateImpact::GainResource(Resource::Steel, _)
                                 | ImmediateImpact::GainResource(Resource::Titanium, _)
                             )
-                        })
-                        .next()
-                        .is_some();
+                        });
                     if !is_on_metal_placement_bonus {
                         return None;
                     }
@@ -375,9 +373,7 @@ impl MarsBoard {
                     //       on maps that don't have such tiles.
                     let has_matching_designation = board_space.designations
                         .iter()
-                        .filter(|d| matches!(d, Designation::Special(s) if s == special_location))
-                        .next()
-                        .is_some();
+                        .any(|d| matches!(d, Designation::Special(s) if s == special_location));
                     if !has_matching_designation {
                         return None;
                     }
@@ -549,18 +545,14 @@ impl BoardSpace {
     pub fn is_land(&self) -> bool {
         self.designations
             .iter()
-            .filter(|d| matches!(d, Designation::Land))
-            .next()
-            .is_some()
+            .any(|d| matches!(d, Designation::Land))
     }
 
     #[inline]
     pub fn is_reserved_for_ocean(&self) -> bool {
         self.designations
             .iter()
-            .filter(|d| matches!(d, Designation::ReservedForOcean))
-            .next()
-            .is_some()
+            .any(|d| matches!(d, Designation::ReservedForOcean))
     }
 }
 

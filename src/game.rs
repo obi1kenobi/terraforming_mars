@@ -319,7 +319,7 @@ impl PlayerState {
         let fails_requirements = card
             .requirements
             .iter()
-            .filter(|requirement| match requirement {
+            .any(|requirement| match requirement {
                 // TODO: check for requirements-easing effect
                 CardRequirement::MaxOxygen(max_oxygen) => board.oxygen <= *max_oxygen,
                 CardRequirement::MinOxygen(min_oxygen) => board.oxygen >= *min_oxygen,
@@ -338,11 +338,9 @@ impl PlayerState {
                 }
                 CardRequirement::MinTags(tag, count) => self.active_tag_count(*tag) >= *count,
                 CardRequirement::MinProduction(resource, amount) => {
-                    *self.production.get(resource).unwrap() >= (*amount as isize)
+                    self.production[resource] >= (*amount as isize)
                 }
-            })
-            .next()
-            .is_some();
+            });
         if fails_requirements {
             return None;
         }
