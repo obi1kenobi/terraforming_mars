@@ -333,13 +333,12 @@ impl MarsBoard {
         placement_bonuses
     }
 
-    pub fn can_place_city(
-        &mut self,
-        player: &mut PlayerState,
-        empty_location: EmptyLocation,
-        city_kind: CityKind,
+    fn placement_satisfies_restrictions(
+        &self,
+        player: &PlayerState,
+        empty_location: &EmptyLocation,
         location_restrictions: &[LocationRestriction],
-    ) -> Option<()> {
+    ) -> bool {
         let location = &empty_location.0;
 
         let mut adjacent_tiles_of_any_kind: usize = 0;
@@ -382,14 +381,13 @@ impl MarsBoard {
         for restriction in location_restrictions {
             match restriction {
                 LocationRestriction::LandTile => {
-                    let board_space = self.spaces.get(location).unwrap();
                     if !board_space.is_land() {
-                        return None;
+                        return false;
                     }
                 },
                 LocationRestriction::ReservedForOcean => {
                     if !board_space.is_reserved_for_ocean() {
-                        return None;
+                        return false;
                     }
                 },
                 LocationRestriction::OnSteelOrTitaniumPlacementBonus => {
@@ -403,7 +401,7 @@ impl MarsBoard {
                             )
                         });
                     if !is_on_metal_placement_bonus {
-                        return None;
+                        return false;
                     }
                 },
                 LocationRestriction::AtSpecialLocation(special_location) => {
@@ -413,41 +411,76 @@ impl MarsBoard {
                         .iter()
                         .any(|d| matches!(d, Designation::Special(s) if s == special_location));
                     if !has_matching_designation {
-                        return None;
+                        return false;
                     }
                 }
                 LocationRestriction::AdjacentToOwnedTile => {
                     if adjacent_owned_tiles == 0 {
-                        return None;
+                        return false;
                     }
                 }
                 LocationRestriction::AdjacentToOwnedTileIfAble => unimplemented!(),
                 LocationRestriction::NotNextToAnyOtherTile => {
                     if adjacent_tiles_of_any_kind > 0 {
-                        return None;
+                        return false;
                     }
                 }
                 LocationRestriction::NotNextToACity => {
                     if adjacent_cities > 0 {
-                        return None;
+                        return false;
                     }
                 }
                 LocationRestriction::NextToACity => {
                     if adjacent_cities < 1 {
-                        return None;
+                        return false;
                     }
                 }
                 LocationRestriction::NextToAtLeastTwoCities => {
                     if adjacent_cities < 2 {
-                        return None;
+                        return false;
                     }
                 }
                 LocationRestriction::NextToAGreenery => {
                     if adjacent_greeneries < 1 {
-                        return None;
+                        return false;
                     }
                 }
             }
+        }
+
+        return true;
+    }
+
+    pub fn can_place_greenery(
+        &mut self,
+        player: &mut PlayerState,
+        empty_location: EmptyLocation,
+        location_restrictions: &[LocationRestriction],
+    ) -> Option<()> {
+        if !self.placement_satisfies_restrictions(player, &empty_location, location_restrictions) {
+            return None
+        }
+
+        let coordinates = match empty_location.0 {
+            TileLocation::OnMars(c) => c,
+            TileLocation::OffMars(_) => unreachable!(),
+        };
+
+        let existing_tile = self.greeneries.insert(coordinates, player.player_id);
+        assert!(existing_tile.is_none());
+
+        Some(())
+    }
+
+    pub fn can_place_city(
+        &mut self,
+        player: &mut PlayerState,
+        empty_location: EmptyLocation,
+        city_kind: CityKind,
+        location_restrictions: &[LocationRestriction],
+    ) -> Option<()> {
+        if !self.placement_satisfies_restrictions(player, &empty_location, location_restrictions) {
+            return None;
         }
 
         let existing_tile = self
