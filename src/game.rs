@@ -1,16 +1,9 @@
-use std::collections::{BTreeMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 
 use maplit::btreemap;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    board::{MarsBoard, TileStatus},
-    card::{
-        Card, CardAction, CardEffect, CardKind, CardRequirement, CardTag, CityKind,
-        VictoryPointValue,
-    },
-    resource::{CardResource, PaymentCost, Resource},
-};
+use crate::{board::{Coordinates, MarsBoard, TileLocation, TileStatus}, card::{Card, CardAction, CardEffect, CardKind, CardRequirement, CardTag, CityKind, ImmediateImpact, SpecialTile, VictoryPointValue}, resource::{CardResource, PaymentCost, Resource}};
 
 const CARD_PURCHASE_COST: usize = 3;
 const DEFAULT_STARTING_TERRAFORM_RATING: usize = 20;
@@ -436,6 +429,128 @@ pub enum TurnAction {
 pub enum PlayerTurn {
     Play(TurnAction, Option<TurnAction>),
     Pass,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum GameOperation {
+    ChangeResources(PlayerId, BTreeMap<Resource, isize>),
+    ChangeProduction(PlayerId, BTreeMap<Resource, isize>),
+    ChangeCardResource(PlayerId, Card, CardResource, isize),
+    DrawCards(PlayerId, usize),
+    DiscardCards(PlayerId, Vec<Card>),
+    PlayCard(PlayerId, Card),
+    PlaceCityTile(PlayerId, CityKind, TileLocation),
+    PlaceGreenery(PlayerId, Coordinates),
+    PlaceSpecialTile(PlayerId, SpecialTile, Coordinates),
+    PlaceOcean(Coordinates),
+    RaiseTemperature,
+    RaiseOxygen,
+    RaiseTerraformRating(PlayerId, usize),
+    MarkCardActionUsed(PlayerId, Card),
+    ResetCardActions,
+    ClaimMilestone, // TODO: add milestone info
+    FundAward,      // TODO: add award info
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Game {
+    pub board: MarsBoard,
+    pub players: HashMap<PlayerId, PlayerState>,
+    pub draw_deck: Vec<Card>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum PlayAttempt {
+    Unplayable,
+
+    // operations so far + remaining impacts to resolve
+    PartiallyPlayable(Vec<GameOperation>, Vec<ImmediateImpact>),
+
+    Playable(Vec<GameOperation>),
+}
+
+impl Game {
+    pub fn execute_operation(&mut self, operation: GameOperation) {
+        match operation {
+            GameOperation::ChangeResources(player_id, resources) => {
+                let player = self.players.get_mut(&player_id).unwrap();
+                for (resource, change) in resources.iter() {
+                    if *change != 0 {
+                        let prior_value = player.resources.get_mut(resource).unwrap();
+                        let new_value = (*prior_value as isize) + change;
+                        assert!(new_value >= 0);
+                        *prior_value = new_value as usize;
+                    }
+                }
+            }
+            GameOperation::ChangeProduction(player_id, production) => {
+                let player = self.players.get_mut(&player_id).unwrap();
+                for (resource, change) in production.iter() {
+                    if *change != 0 {
+                        let prior_value = player.production.get_mut(resource).unwrap();
+                        let new_value = *prior_value + change;
+                        if *resource == Resource::Megacredits {
+                            assert!(player.terraform_rating as isize + new_value >= 0);
+                        } else {
+                            assert!(new_value >= 0);
+                        }
+                        *prior_value = new_value;
+                    }
+                }
+            }
+            GameOperation::ChangeCardResource(player_id, card, card_resource, amount) => {
+                let player = self.players.get_mut(&player_id).unwrap();
+
+                assert!(card.supports_card_resource() == Some(card_resource));
+
+                player.card_resources.entry((card, card_resource)).and_modify(|quantity| {
+                    let new_quantity = (*quantity as isize) + amount;
+                    assert!(new_quantity >= 0);
+                    *quantity = new_quantity as usize;
+                }).or_insert_with(|| {
+                    assert!(amount >= 0);
+                    amount as usize
+                });
+            }
+            GameOperation::DrawCards(player_id, count) => {
+                let player = self.players.get_mut(&player_id).unwrap();
+                player
+                    .cards_in_hand
+                    .extend(self.draw_deck.drain((self.draw_deck.len() - count)..));
+            }
+            GameOperation::DiscardCards(_, _) => todo!(),
+            GameOperation::PlayCard(_, _) => todo!(),
+            GameOperation::PlaceCityTile(player_id, city_kind, location) => {
+                self.board.cities.insert(location, (city_kind, player_id));
+            }
+            GameOperation::PlaceGreenery(player_id, coordinates) => {
+                self.board.greeneries.insert(coordinates, player_id);
+            }
+            GameOperation::PlaceSpecialTile(player_id, tile, coordinates) => {
+                self.board.special_tiles.insert(coordinates, (tile, player_id));
+            }
+            GameOperation::PlaceOcean(coordinates) => {
+                self.board.oceans.insert(coordinates);
+            }
+            GameOperation::RaiseTemperature => todo!(),
+            GameOperation::RaiseOxygen => todo!(),
+            GameOperation::RaiseTerraformRating(player_id, amount) => {
+                let player = self.players.get_mut(&player_id).unwrap();
+                player.terraform_rating += amount;
+            }
+            GameOperation::MarkCardActionUsed(player_id, card) => {
+                let player = self.players.get_mut(&player_id).unwrap();
+                player.tapped_active_cards.insert(card);
+            }
+            GameOperation::ResetCardActions => {
+                for (_, player) in self.players.iter_mut() {
+                    player.tapped_active_cards.clear();
+                }
+            }
+            GameOperation::ClaimMilestone => todo!(),
+            GameOperation::FundAward => todo!(),
+        }
+    }
 }
 
 #[cfg(test)]

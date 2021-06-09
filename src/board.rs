@@ -469,6 +469,16 @@ impl MarsBoard {
         let existing_tile = self.greeneries.insert(coordinates, player.player_id);
         assert!(existing_tile.is_none());
 
+        let mut maybe_impact = self.increase_oxygen(player);
+        while let Some(impact) = maybe_impact {
+            match impact {
+                ImmediateImpact::RaiseTemperature => {
+                    maybe_impact = self.increase_temperature(player);
+                }
+                _ => unreachable!()  // TODO: handle ocean placement
+            }
+        }
+
         Some(())
     }
 
