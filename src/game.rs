@@ -1,9 +1,17 @@
 use std::collections::{BTreeMap, HashMap, HashSet};
 
 use maplit::btreemap;
+use rand::{prelude::SliceRandom, thread_rng};
 use serde::{Deserialize, Serialize};
 
-use crate::{board::{Coordinates, MarsBoard, TileLocation, TileStatus}, card::{Card, CardAction, CardEffect, CardKind, CardRequirement, CardTag, CityKind, ImmediateImpact, SpecialTile, VictoryPointValue}, resource::{CardResource, PaymentCost, Resource}};
+use crate::{
+    board::{Coordinates, MarsBoard, TileLocation, TileStatus},
+    card::{
+        Card, CardAction, CardEffect, CardKind, CardRequirement, CardTag, CityKind,
+        ImmediateImpact, SpecialTile, VictoryPointValue,
+    },
+    resource::{CardResource, PaymentCost, Resource},
+};
 
 const CARD_PURCHASE_COST: usize = 3;
 const DEFAULT_STARTING_TERRAFORM_RATING: usize = 20;
@@ -438,7 +446,7 @@ pub enum GameOperation {
     ChangeCardResource(PlayerId, Card, CardResource, isize),
     DrawCards(PlayerId, usize),
     DiscardCards(PlayerId, Vec<Card>),
-    PlayCard(PlayerId, Card),
+    PutCardIntoPlay(PlayerId, Card),
     PlaceCityTile(PlayerId, CityKind, TileLocation),
     PlaceGreenery(PlayerId, Coordinates),
     PlaceSpecialTile(PlayerId, SpecialTile, Coordinates),
@@ -446,6 +454,7 @@ pub enum GameOperation {
     RaiseTemperature,
     RaiseOxygen,
     RaiseTerraformRating(PlayerId, usize),
+    AddEffect(PlayerId, CardEffect),
     MarkCardActionUsed(PlayerId, Card),
     ResetCardActions,
     ClaimMilestone, // TODO: add milestone info
@@ -457,6 +466,7 @@ pub struct Game {
     pub board: MarsBoard,
     pub players: HashMap<PlayerId, PlayerState>,
     pub draw_deck: Vec<Card>,
+    pub discard_pile: Vec<Card>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -503,40 +513,128 @@ impl Game {
 
                 assert!(card.supports_card_resource() == Some(card_resource));
 
-                player.card_resources.entry((card, card_resource)).and_modify(|quantity| {
-                    let new_quantity = (*quantity as isize) + amount;
-                    assert!(new_quantity >= 0);
-                    *quantity = new_quantity as usize;
-                }).or_insert_with(|| {
-                    assert!(amount >= 0);
-                    amount as usize
-                });
+                player
+                    .card_resources
+                    .entry((card, card_resource))
+                    .and_modify(|quantity| {
+                        let new_quantity = (*quantity as isize) + amount;
+                        assert!(new_quantity >= 0);
+                        *quantity = new_quantity as usize;
+                    })
+                    .or_insert_with(|| {
+                        assert!(amount >= 0);
+                        amount as usize
+                    });
             }
-            GameOperation::DrawCards(player_id, count) => {
+            GameOperation::DrawCards(player_id, mut count) => {
                 let player = self.players.get_mut(&player_id).unwrap();
+
+                if count > self.draw_deck.len() {
+                    player.cards_in_hand.extend(self.draw_deck.drain(..));
+                    count -= self.draw_deck.len();
+
+                    let mut rng = thread_rng();
+                    self.discard_pile.shuffle(&mut rng);
+                    self.draw_deck.extend(self.discard_pile.drain(..));
+                }
+
+                assert!(count <= self.draw_deck.len());
                 player
                     .cards_in_hand
                     .extend(self.draw_deck.drain((self.draw_deck.len() - count)..));
             }
-            GameOperation::DiscardCards(_, _) => todo!(),
-            GameOperation::PlayCard(_, _) => todo!(),
+            GameOperation::DiscardCards(player_id, discard) => {
+                let player = self.players.get_mut(&player_id).unwrap();
+
+                let initial_hand_size = player.cards_in_hand.len();
+                player.cards_in_hand.retain(|card| !discard.contains(card));
+                assert_eq!(
+                    initial_hand_size,
+                    player.cards_in_hand.len() + discard.len()
+                );
+
+                self.discard_pile.extend_from_slice(&discard);
+            }
+            GameOperation::PutCardIntoPlay(player_id, played_card) => {
+                let player = self.players.get_mut(&player_id).unwrap();
+
+                let initial_hand_size = player.cards_in_hand.len();
+                player.cards_in_hand.retain(|card| *card != played_card);
+                assert_eq!(initial_hand_size, player.cards_in_hand.len() + 1);
+
+                player.played_cards.push(played_card);
+            }
             GameOperation::PlaceCityTile(player_id, city_kind, location) => {
-                self.board.cities.insert(location, (city_kind, player_id));
+                match location {
+                    TileLocation::OnMars(coordinates) => {
+                        assert!(self.board.greeneries.get(&coordinates).is_none());
+                        assert!(self.board.special_tiles.get(&coordinates).is_none());
+                        assert!(self.board.oceans.get(&coordinates).is_none());
+                    }
+                    _ => {}
+                }
+
+                let existing_city = self.board.cities.insert(location, (city_kind, player_id));
+                assert!(existing_city.is_none());
             }
             GameOperation::PlaceGreenery(player_id, coordinates) => {
-                self.board.greeneries.insert(coordinates, player_id);
+                assert!(self
+                    .board
+                    .cities
+                    .get(&TileLocation::OnMars(coordinates))
+                    .is_none());
+                assert!(self.board.special_tiles.get(&coordinates).is_none());
+                assert!(self.board.oceans.get(&coordinates).is_none());
+
+                let existing_greenery = self.board.greeneries.insert(coordinates, player_id);
+                assert!(existing_greenery.is_none());
             }
             GameOperation::PlaceSpecialTile(player_id, tile, coordinates) => {
-                self.board.special_tiles.insert(coordinates, (tile, player_id));
+                assert!(self
+                    .board
+                    .cities
+                    .get(&TileLocation::OnMars(coordinates))
+                    .is_none());
+                assert!(self.board.greeneries.get(&coordinates).is_none());
+                assert!(self.board.oceans.get(&coordinates).is_none());
+
+                let existing_tile = self
+                    .board
+                    .special_tiles
+                    .insert(coordinates, (tile, player_id));
+                assert!(existing_tile.is_none());
             }
             GameOperation::PlaceOcean(coordinates) => {
-                self.board.oceans.insert(coordinates);
+                assert!(self
+                    .board
+                    .cities
+                    .get(&TileLocation::OnMars(coordinates))
+                    .is_none());
+                assert!(self.board.greeneries.get(&coordinates).is_none());
+                assert!(self.board.special_tiles.get(&coordinates).is_none());
+
+                assert!(self.board.oceans.len() < MarsBoard::MAX_OCEANS);
+
+                let has_existing_ocean = self.board.oceans.insert(coordinates);
+                assert!(!has_existing_ocean);
             }
-            GameOperation::RaiseTemperature => todo!(),
-            GameOperation::RaiseOxygen => todo!(),
+            GameOperation::RaiseTemperature => {
+                assert!(self.board.temperature < MarsBoard::MAX_TEMPERATURE);
+
+                self.board.temperature += MarsBoard::TEMPERATURE_INCREMENT;
+            }
+            GameOperation::RaiseOxygen => {
+                assert!(self.board.oxygen < MarsBoard::MAX_OXYGEN);
+
+                self.board.oxygen += MarsBoard::OXYGEN_INCREMENT;
+            }
             GameOperation::RaiseTerraformRating(player_id, amount) => {
                 let player = self.players.get_mut(&player_id).unwrap();
                 player.terraform_rating += amount;
+            }
+            GameOperation::AddEffect(player_id, effect) => {
+                let player = self.players.get_mut(&player_id).unwrap();
+                player.effects.push(effect);
             }
             GameOperation::MarkCardActionUsed(player_id, card) => {
                 let player = self.players.get_mut(&player_id).unwrap();

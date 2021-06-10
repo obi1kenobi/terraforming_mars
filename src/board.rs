@@ -153,7 +153,14 @@ pub struct MarsBoard {
 }
 
 impl MarsBoard {
-    const DEFAULT_OCEAN_ADJACENCY_MEGACREDITS: usize = 2;
+    pub const DEFAULT_OCEAN_ADJACENCY_MEGACREDITS: usize = 2;
+    pub const MAX_OCEANS: usize = 9;
+    pub const STARTING_TEMPERATURE: isize = -30;
+    pub const MAX_TEMPERATURE: isize = 8;
+    pub const TEMPERATURE_INCREMENT: isize = 2;
+    pub const STARTING_OXYGEN: usize = 0;
+    pub const MAX_OXYGEN: usize = 14;
+    pub const OXYGEN_INCREMENT: usize = 1;
 
     pub fn new(
         board_name: String,
@@ -202,7 +209,9 @@ impl MarsBoard {
             if self.temperature == -24 || self.temperature == -20 {
                 Some(ImmediateImpact::GainProduction(Resource::Heat, 1))
             } else if self.temperature == 0 {
-                Some(ImmediateImpact::PlaceOcean(vec![LocationRestriction::ReservedForOcean]))
+                Some(ImmediateImpact::PlaceOcean(vec![
+                    LocationRestriction::ReservedForOcean,
+                ]))
             } else {
                 None
             }
@@ -358,9 +367,7 @@ impl MarsBoard {
                 TileStatus::Greenery(_, _) => {
                     adjacent_greeneries += 1;
                 }
-                TileStatus::Empty(_)
-                | TileStatus::Ocean(_)
-                | TileStatus::SpecialTile(_, _, _) => {}
+                TileStatus::Empty(_) | TileStatus::Ocean(_) | TileStatus::SpecialTile(_, _, _) => {}
             }
 
             adjacent_owned_tiles += match status {
@@ -384,30 +391,30 @@ impl MarsBoard {
                     if !board_space.is_land() {
                         return false;
                     }
-                },
+                }
                 LocationRestriction::ReservedForOcean => {
                     if !board_space.is_reserved_for_ocean() {
                         return false;
                     }
-                },
+                }
                 LocationRestriction::OnSteelOrTitaniumPlacementBonus => {
-                    let is_on_metal_placement_bonus = board_space.placement_bonus
-                        .iter()
-                        .any(|impact| {
+                    let is_on_metal_placement_bonus =
+                        board_space.placement_bonus.iter().any(|impact| {
                             matches!(
                                 impact,
                                 ImmediateImpact::GainResource(Resource::Steel, _)
-                                | ImmediateImpact::GainResource(Resource::Titanium, _)
+                                    | ImmediateImpact::GainResource(Resource::Titanium, _)
                             )
                         });
                     if !is_on_metal_placement_bonus {
                         return false;
                     }
-                },
+                }
                 LocationRestriction::AtSpecialLocation(special_location) => {
                     // TODO: Handle placing volcanic area city / Noctis City
                     //       on maps that don't have such tiles.
-                    let has_matching_designation = board_space.designations
+                    let has_matching_designation = board_space
+                        .designations
                         .iter()
                         .any(|d| matches!(d, Designation::Special(s) if s == special_location));
                     if !has_matching_designation {
@@ -458,7 +465,7 @@ impl MarsBoard {
         location_restrictions: &[LocationRestriction],
     ) -> Option<()> {
         if !self.placement_satisfies_restrictions(player, &empty_location, location_restrictions) {
-            return None
+            return None;
         }
 
         let coordinates = match empty_location.0 {
@@ -475,7 +482,7 @@ impl MarsBoard {
                 ImmediateImpact::RaiseTemperature => {
                     maybe_impact = self.increase_temperature(player);
                 }
-                _ => unreachable!()  // TODO: handle ocean placement
+                _ => unreachable!(), // TODO: handle ocean placement
             }
         }
 
