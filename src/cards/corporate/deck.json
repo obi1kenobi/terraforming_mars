@@ -797,7 +797,7 @@
                     },
                     [
                         {
-                            "GainProduction": [
+                            "ChangeProduction": [
                                 "Steel",
                                 1
                             ]
@@ -1143,6 +1143,224 @@
             },
             {
                 "GainMiningProductionMatchingPlacementBonus": 1
+            }
+        ]
+    },
+    {
+        "name": "Business Network",
+        "kind": "Active",
+        "tags": [
+            "Earth"
+        ],
+        "cost": {
+            "Megacredits": 4
+        },
+        "immediate_impacts": [
+            {
+                "ChangeProduction": [
+                    "Megacredits",
+                    1
+                ]
+            }
+        ],
+        "actions": [
+            {
+                "CauseFreeImpact": {
+                    "LookAndBuyFromDeck": 1
+                }
+            }
+        ]
+    },
+    {
+        "name": "Inventors' Guild",
+        "kind": "Active",
+        "tags": [
+            "Science"
+        ],
+        "cost": {
+            "Megacredits": 9
+        },
+        "actions": [
+            {
+                "CauseFreeImpact": {
+                    "LookAndBuyFromDeck": 1
+                }
+            }
+        ]
+    },
+    {
+        "name": "Business Contacts",
+        "kind": "Event",
+        "tags": [
+            "Earth",
+            "Event"
+        ],
+        "cost": {
+            "Megacredits": 7
+        },
+        "immediate_impacts": [
+            {
+                "LookAndTakeFromDeck": [
+                    4,
+                    2
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Invention Contest",
+        "kind": "Event",
+        "tags": [
+            "Science",
+            "Event"
+        ],
+        "cost": {
+            "Megacredits": 2
+        },
+        "immediate_impacts": [
+            {
+                "LookAndTakeFromDeck": [
+                    3,
+                    1
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Indentured Workers",
+        "kind": "Event",
+        "tags": [
+            "Event"
+        ],
+        "cost": {
+            "Megacredits": 0
+        },
+        "points": {
+            "Immediate": -1
+        },
+        "next_card_this_generation_effects": [
+            {
+                "AnyCardDiscount": 8
+            }
+        ]
+    },
+    {
+        "name": "Special Design",
+        "kind": "Event",
+        "tags": [
+            "Science",
+            "Event"
+        ],
+        "cost": {
+            "Megacredits": 4
+        },
+        "next_card_this_generation_effects": [
+            {
+                "GlobalRequirementsTolerance": 2
+            }
+        ]
+    },
+    {
+        "name": "Viral Enhancers",
+        "kind": "Automatic",
+        "tags": [
+            "Science",
+            "Microbe"
+        ],
+        "cost": {
+            "Megacredits": 9
+        },
+        "effects": [
+            {
+                "OnOwnTagPlayed": [
+                    "Plant",
+                    {
+                        "OneOf": [
+                            {
+                                "GainResource": [
+                                    "Plants",
+                                    1
+                                ]
+                            },
+                            {
+                                "AddResourceToPlayedCard": 1
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "OnOwnTagPlayed": [
+                    "Microbe",
+                    {
+                        "OneOf": [
+                            {
+                                "GainResource": [
+                                    "Plants",
+                                    1
+                                ]
+                            },
+                            {
+                                "AddResourceToPlayedCard": 1
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "OnOwnTagPlayed": [
+                    "Animal",
+                    {
+                        "OneOf": [
+                            {
+                                "GainResource": [
+                                    "Plants",
+                                    1
+                                ]
+                            },
+                            {
+                                "AddResourceToPlayedCard": 1
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "CEO's Favorite Project",
+        "kind": "Event",
+        "tags": [
+            "Event"
+        ],
+        "cost": {
+            "Megacredits": 1
+        },
+        "immediate_impacts": [
+            {
+                "AddResourceToAnyCardWithExistingResource": [1, 1]
+            }
+        ]
+    },
+    {
+        "name": "Hired Raiders",
+        "kind": "Event",
+        "tags": [
+            "Event"
+        ],
+        "cost": {
+            "Megacredits": 1
+        },
+        "immediate_impacts": [
+            {
+                "OneOf": [
+                    {
+                        "StealResource": ["Steel", 2]
+                    },
+                    {
+                        "StealResource": ["Megacredits", 3]
+                    }
+                ]
             }
         ]
     }

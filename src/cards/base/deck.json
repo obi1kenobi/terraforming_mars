@@ -345,7 +345,10 @@
         "immediate_impacts": [
             "RaiseOxygen",
             {
-                "DestroyAnyPlants": 2
+                "DestroyAnyResource": [
+                    "Plants",
+                    2
+                ]
             },
             {
                 "GainResource": [
@@ -703,7 +706,10 @@
                 ]
             },
             {
-                "DestroyAnyPlants": 8
+                "DestroyAnyResource": [
+                    "Plants",
+                    8
+                ]
             }
         ]
     },
@@ -735,7 +741,7 @@
         "effects": [
             {
                 "OnAnyPlacedCity": {
-                    "GainProduction": [
+                    "ChangeProduction": [
                         "Megacredits",
                         1
                     ]
@@ -1109,7 +1115,10 @@
         ],
         "immediate_impacts": [
             {
-                "DestroyOwnPlants": 2
+                "DestroyOwnResource": [
+                    "Plants",
+                    2
+                ]
             }
         ],
         "own_production": {
@@ -1167,7 +1176,10 @@
         ],
         "immediate_impacts": [
             {
-                "DestroyOwnPlants": 1
+                "DestroyOwnResource": [
+                    "Plants",
+                    1
+                ]
             }
         ],
         "own_production": {
@@ -1369,7 +1381,10 @@
                 ]
             },
             {
-                "DestroyAnyPlants": 6
+                "DestroyAnyResource": [
+                    "Plants",
+                    6
+                ]
             }
         ]
     },
@@ -1886,7 +1901,10 @@
                 ]
             },
             {
-                "DestroyAnyPlants": 3
+                "DestroyAnyResource": [
+                    "Plants",
+                    3
+                ]
             }
         ]
     },
@@ -1924,7 +1942,10 @@
                 ]
             },
             {
-                "DestroyAnyPlants": 4
+                "DestroyAnyResource": [
+                    "Plants",
+                    4
+                ]
             }
         ]
     },
@@ -1946,7 +1967,10 @@
                 ]
             },
             {
-                "DestroyAnyPlants": 3
+                "DestroyAnyResource": [
+                    "Plants",
+                    3
+                ]
             }
         ]
     },
@@ -2257,7 +2281,7 @@
                     },
                     [
                         {
-                            "GainProduction": [
+                            "ChangeProduction": [
                                 "Heat",
                                 2
                             ]
@@ -2285,7 +2309,7 @@
                     },
                     [
                         {
-                            "GainProduction": [
+                            "ChangeProduction": [
                                 "Energy",
                                 1
                             ]
@@ -3282,7 +3306,9 @@
         },
         "points": {
             "PerCardResource": [
-                1, 2, "Animal"
+                1,
+                2,
+                "Animal"
             ]
         },
         "effects": [
@@ -3338,6 +3364,30 @@
             },
             {
                 "GainMiningProductionMatchingPlacementBonus": 1
+            }
+        ]
+    },
+    {
+        "name": "Flooding",
+        "kind": "Event",
+        "tags": [
+            "Event"
+        ],
+        "cost": {
+            "Megacredits": 7
+        },
+        "points": {
+            "Immediate": -1
+        },
+        "immediate_impacts": [
+            {
+                "PlaceFloodingOcean": [
+                    "Megacredits",
+                    4,
+                    [
+                        "ReservedForOcean"
+                    ]
+                ]
             }
         ]
     }

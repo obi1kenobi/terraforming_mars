@@ -73,19 +73,38 @@ pub enum ImmediateImpact {
     PlaceGreenery(Vec<LocationRestriction>),
     PlaceCity(CityKind, Vec<LocationRestriction>),
 
+    // like PlaceOcean, but may also remove the specified resource amount from any player
+    // adjacent to the placed ocean tile
+    PlaceFloodingOcean(Resource, usize, Vec<LocationRestriction>),
+
     DrawCard(usize),
+
+    // unbought / un-taken cards are always discarded
+    LookAndBuyFromDeck(usize), // look at N cards, buy any of them at the standard purchase price
+    LookAndTakeFromDeck(usize, usize), // (look_at, take): look at N cards, keep M of them
 
     AddResourceToSameCard(CardResource, usize), // card that caused the impact
     AddResourceToAnotherCard(CardResource, usize), // *not* the card that caused the impact
     AddResourceToAnyCard(CardResource, usize), // any card, including the one that caused the impact
-    AddResourceToPlayedCard(CardResource, usize), // used when impact is triggered from an effect
+
+    // used when impact is triggered from an effect,
+    // the resource type is whatever card resource type the played card supports
+    AddResourceToPlayedCard(usize),
+
+    // (min_resource, add_amount): if a card has at least the given amount of its resource,
+    // then add the specified amount of its resource to it; example:
+    // "add 1 resource to a card with at least 1 resource on it"
+    AddResourceToAnyCardWithExistingResource(usize, usize),
 
     GainResource(Resource, usize),
     GainResourcePerCity(Resource, usize),
     GainResourcePerCityOnMars(Resource, usize),
-    GainProduction(Resource, usize),
+    ChangeProduction(Resource, isize),
     GainProductionPerCity(Resource, usize),
     GainProductionPerCityOnMars(Resource, usize),
+
+    // gain the specified resource amount if having at least the given number of tags in play
+    GainProductionIfMinTags(Resource, usize, CardTag, usize),
 
     // used for cards like Mining Area and Mining Rights:
     // they must be placed on tiles with a steel or titanium placement bonus,
@@ -97,12 +116,29 @@ pub enum ImmediateImpact {
     GainProductionPerOpponentTag(CardTag, usize, Resource, usize),
     GainProductionPerAnyTag(CardTag, usize, Resource, usize), // own or opponent-played tag
 
-    DestroyOwnPlants(usize),
-    DestroyAnyPlants(usize),
+    // transform arbitrary amount of resources/production (from_resource, to_resource), examples:
+    // - "spend any amount of energy to gain that amount of M$"
+    // - "decrease your heat production any number of steps and increase your M$ production
+    //    the same number of steps"
+    TransformResource(Resource, Resource),
+    TransformProduction(Resource, Resource),
+
+    // all steal and destroy *up to* that amount
+    DestroyOwnResource(Resource, usize),
+    DestroyAnyResource(Resource, usize),
+    DestroyAnyCardResource(CardResource, usize),
+    StealResource(Resource, usize), // steal from any player, give to yourself
 
     PlaceSpecialTile(SpecialTile, Vec<LocationRestriction>),
 
     CopyProductionOfCard(CardTag),
+
+    // any one of the contained impacts, at the players' choice
+    OneOf(Vec<ImmediateImpact>),
+
+    // if the first impact can be resolved successfully, the second may happen too; example:
+    // "discard a card from your hand to draw a card"
+    Chained(Box<ImmediateImpact>, Box<ImmediateImpact>),
 }
 
 #[derive(Clone, Debug, PartialOrd, Ord, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -168,6 +204,8 @@ pub enum SpecialTile {
     EcologicalZone,     // placed adjacent to any greenery tile
     MiningRights,       // placed on steel/titanium placement bonus
     MiningArea,         // placed on steel/titanium placement bonus, adjacent to owned tile
+    LandClaim,          // placed anywhere, may be replaced with any tile of the placing player,
+                        // does not count for purposes of tile ownership
 }
 
 #[derive(Clone, Copy, Debug, PartialOrd, Ord, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -212,7 +250,9 @@ pub enum CardEffect {
     // whenever the player with this effect does the thing
     OnOwnPlacedGreenery(ImmediateImpact),
     OnOwnTagPlayed(CardTag, ImmediateImpact),
-    OnOwnTagCombinationPlayed(Vec<CardTag>, Vec<ImmediateImpact>), // all the tags are on the same card
+    // all the tags are on the same card,
+    // all the impacts happen individually (not conditioned on each other)
+    OnOwnTagCombinationPlayed(Vec<CardTag>, Vec<ImmediateImpact>),
 }
 
 #[derive(Clone, Debug, PartialOrd, Ord, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -249,6 +289,10 @@ pub struct Card {
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub effects: Vec<CardEffect>,
+
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub next_card_this_generation_effects: Vec<CardEffect>,
 }
 
 impl Card {
@@ -264,6 +308,7 @@ impl Card {
         immediate_impacts: Vec<ImmediateImpact>,
         actions: Vec<CardAction>,
         effects: Vec<CardEffect>,
+        next_card_this_generation_effects: Vec<CardEffect>,
     ) -> Self {
         // Either there are no actions, or the card is considered active.
         assert!(actions.is_empty() ^ (kind == CardKind::Active));
@@ -286,6 +331,7 @@ impl Card {
             immediate_impacts,
             actions,
             effects,
+            next_card_this_generation_effects,
         }
     }
 
@@ -315,8 +361,7 @@ impl Card {
 
         for impact in possible_impacts {
             match impact {
-                ImmediateImpact::AddResourceToSameCard(cr, _)
-                | ImmediateImpact::AddResourceToPlayedCard(cr, _) => {
+                ImmediateImpact::AddResourceToSameCard(cr, _) => {
                     assert_eq!(*cr, result.unwrap_or(*cr));
                     result = Some(*cr);
                 }
@@ -364,10 +409,13 @@ lazy_static! {
 
 #[cfg(test)]
 mod tests {
-    use crate::{card::{
+    use crate::{
+        card::{
             get_base_game_deck, get_corporate_deck_only, Card, CardKind, CardTag, ImmediateImpact,
             BASE_GAME_CARDS_BY_NAME,
-        }, resource::{CardResource, PaymentCost}};
+        },
+        resource::{CardResource, PaymentCost},
+    };
 
     fn is_card_valid(card: &Card) -> bool {
         let mut is_valid = true;

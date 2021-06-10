@@ -35,6 +35,7 @@ pub struct PlayerState {
     pub terraform_rating: usize,
     pub steel_value: usize,
     pub titanium_value: usize,
+    pub next_card_this_generation_effects: Vec<CardEffect>,
 
     // indexes of primary data
     pub effects: Vec<CardEffect>,
@@ -49,6 +50,7 @@ pub struct PlayerStateBuilder {
     pub tapped_active_cards: Option<HashSet<Card>>,
     pub cards_in_hand: Option<Vec<Card>>,
     pub terraform_rating: usize,
+    pub next_card_this_generation_effects: Option<Vec<CardEffect>>,
 }
 
 impl PlayerStateBuilder {
@@ -62,6 +64,7 @@ impl PlayerStateBuilder {
             tapped_active_cards: None,
             cards_in_hand: None,
             terraform_rating: DEFAULT_STARTING_TERRAFORM_RATING,
+            next_card_this_generation_effects: None,
         }
     }
 
@@ -178,6 +181,7 @@ impl PlayerStateBuilder {
             terraform_rating: self.terraform_rating,
             steel_value: steel_value,
             titanium_value: titanium_value,
+            next_card_this_generation_effects: self.next_card_this_generation_effects.unwrap_or_default(),
             effects: effects,
         }
     }
@@ -403,6 +407,7 @@ impl PlayerState {
 
         self.resources = new_resources;
         self.tapped_active_cards.clear();
+        self.next_card_this_generation_effects.clear();
     }
 }
 
