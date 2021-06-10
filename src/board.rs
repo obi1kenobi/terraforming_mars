@@ -1,12 +1,9 @@
 use std::collections::{HashMap, HashSet};
 
+use maplit::btreemap;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    card::{CityKind, ImmediateImpact, LocationRestriction, SpecialLocation, SpecialTile},
-    game::{PlayerId, PlayerState},
-    resource::Resource,
-};
+use crate::{card::{CityKind, ImmediateImpact, LocationRestriction, SpecialLocation, SpecialTile}, game::{GameOperation, PlayAttempt, PlayerId, PlayerState}, resource::Resource};
 
 /// Using implicit 3-axis "cube" coordinate system, with all points satisfying x + y + z = 0.
 /// We always drop the z coordinate, since it's implicitly z = -(x + y).
@@ -195,43 +192,59 @@ impl MarsBoard {
         }
     }
 
-    pub fn increase_temperature(&mut self, player: &mut PlayerState) -> Option<ImmediateImpact> {
-        assert!(self.temperature <= 8);
-        assert!(self.temperature >= -30);
-        assert_eq!(self.temperature % 2, 0);
+    pub fn increase_temperature(&self, player: &PlayerState) -> PlayAttempt {
+        assert!(self.temperature <= MarsBoard::MAX_TEMPERATURE);
+        assert!(self.temperature >= MarsBoard::STARTING_TEMPERATURE);
+        assert_eq!(self.temperature % MarsBoard::TEMPERATURE_INCREMENT, 0);
 
-        if self.temperature == 8 {
-            None
+        if self.temperature == MarsBoard::MAX_TEMPERATURE {
+            PlayAttempt::Unplayable
         } else {
-            self.temperature += 2;
-            player.terraform_rating += 1;
+            let mut operations = vec![
+                GameOperation::RaiseTemperature,
+                GameOperation::RaiseTerraformRating(player.player_id, 1),
+            ];
 
-            if self.temperature == -24 || self.temperature == -20 {
-                Some(ImmediateImpact::GainProduction(Resource::Heat, 1))
-            } else if self.temperature == 0 {
-                Some(ImmediateImpact::PlaceOcean(vec![
-                    LocationRestriction::ReservedForOcean,
-                ]))
+            let new_temperature = self.temperature + MarsBoard::TEMPERATURE_INCREMENT;
+
+            if new_temperature == 0 && self.oceans.len() < MarsBoard::MAX_OCEANS {
+                PlayAttempt::PartiallyPlayable(
+                    operations,
+                    vec![
+                        ImmediateImpact::PlaceOcean(vec![
+                            LocationRestriction::ReservedForOcean,
+                        ])
+                    ]
+                )
             } else {
-                None
+                if new_temperature == -24 || new_temperature == -20 {
+                    operations.push(GameOperation::ChangeProduction(player.player_id, btreemap! { Resource::Heat => 1 }));
+                }
+                PlayAttempt::Playable(operations)
             }
         }
     }
 
-    pub fn increase_oxygen(&mut self, player: &mut PlayerState) -> Option<ImmediateImpact> {
-        assert!(self.oxygen <= 14);
+    pub fn can_increase_oxygen(&self, player: &PlayerState) -> PlayAttempt {
+        assert!(self.oxygen <= MarsBoard::MAX_OXYGEN);
 
-        if self.oxygen == 14 {
-            None
+        if self.oxygen == MarsBoard::MAX_OXYGEN {
+            PlayAttempt::Unplayable
         } else {
-            self.oxygen += 1;
-            player.terraform_rating += 1;
+            let new_oxygen = self.oxygen + MarsBoard::OXYGEN_INCREMENT;
+            let mut operations = vec![
+                GameOperation::RaiseOxygen,
+                GameOperation::RaiseTerraformRating(player.player_id, 1),
+            ];
 
-            if self.oxygen == 8 {
-                Some(ImmediateImpact::RaiseTemperature)
-            } else {
-                None
+            if new_oxygen == 8 && self.temperature < MarsBoard::MAX_TEMPERATURE {
+                operations.extend_from_slice(&[
+                    GameOperation::RaiseTemperature,
+                    GameOperation::RaiseTerraformRating(player.player_id, 1),
+                ]);
             }
+
+            PlayAttempt::Playable(operations)
         }
     }
 
@@ -459,13 +472,13 @@ impl MarsBoard {
     }
 
     pub fn can_place_greenery(
-        &mut self,
-        player: &mut PlayerState,
+        &self,
+        player: &PlayerState,
         empty_location: EmptyLocation,
         location_restrictions: &[LocationRestriction],
-    ) -> Option<()> {
+    ) -> PlayAttempt {
         if !self.placement_satisfies_restrictions(player, &empty_location, location_restrictions) {
-            return None;
+            return PlayAttempt::Unplayable;
         }
 
         let coordinates = match empty_location.0 {
@@ -473,20 +486,26 @@ impl MarsBoard {
             TileLocation::OffMars(_) => unreachable!(),
         };
 
-        let existing_tile = self.greeneries.insert(coordinates, player.player_id);
-        assert!(existing_tile.is_none());
+        assert!(self.greeneries.get(&coordinates).is_none());
+        let mut operations = vec![
+            GameOperation::PlaceGreenery(player.player_id, coordinates),
+        ];
+        // TODO: turn the impacts from self.get_placement_bonuses(empty_location) into operations here
 
-        let mut maybe_impact = self.increase_oxygen(player);
-        while let Some(impact) = maybe_impact {
-            match impact {
-                ImmediateImpact::RaiseTemperature => {
-                    maybe_impact = self.increase_temperature(player);
-                }
-                _ => unreachable!(), // TODO: handle ocean placement
+        match self.can_increase_oxygen(player) {
+            PlayAttempt::Playable(ops) => {
+                operations.extend_from_slice(&ops);
+                PlayAttempt::Playable(operations)
+            }
+            PlayAttempt::PartiallyPlayable(ops, impacts) => {
+                operations.extend_from_slice(&ops);
+                PlayAttempt::PartiallyPlayable(operations, impacts)
+            }
+            PlayAttempt::Unplayable => {
+                // can still place the greneery but can't get the oxygen boost
+                PlayAttempt::Playable(operations)
             }
         }
-
-        Some(())
     }
 
     pub fn can_place_city(
@@ -504,6 +523,8 @@ impl MarsBoard {
             .cities
             .insert(empty_location.0, (city_kind, player.player_id));
         assert!(existing_tile.is_none());
+
+        // TODO: turn the impacts from self.get_placement_bonuses(empty_location) into operations here
 
         Some(())
     }
