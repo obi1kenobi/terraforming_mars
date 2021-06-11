@@ -317,8 +317,7 @@ impl PlayerState {
         current_total_points
     }
 
-    pub fn can_play_card(&self, board: &MarsBoard, index_in_hand: usize) -> Option<PaymentCost> {
-        let card = &self.cards_in_hand[index_in_hand];
+    pub fn can_play_card(&self, board: &MarsBoard, card: &Card) -> Option<PaymentCost> {
         let megacredits_balance = self.resources[&Resource::Megacredits];
 
         let fails_requirements = card

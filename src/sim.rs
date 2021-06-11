@@ -71,7 +71,7 @@ fn make_all_possible_plays_recursively(
         Some(card) => {
             let state = initial_state.clone();
 
-            let play_vector = match state.can_play_card(board, *next_card_index_to_consider) {
+            let play_vector = match state.can_play_card(board, card) {
                 None => {
                     vec![]
                 }
