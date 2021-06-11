@@ -1338,7 +1338,10 @@
         },
         "immediate_impacts": [
             {
-                "AddResourceToAnyCardWithExistingResource": [1, 1]
+                "AddResourceToAnyCardWithExistingResource": [
+                    1,
+                    1
+                ]
             }
         ]
     },
@@ -1355,12 +1358,194 @@
             {
                 "OneOf": [
                     {
-                        "StealResource": ["Steel", 2]
+                        "StealResource": [
+                            "Steel",
+                            2
+                        ]
                     },
                     {
-                        "StealResource": ["Megacredits", 3]
+                        "StealResource": [
+                            "Megacredits",
+                            3
+                        ]
                     }
                 ]
+            }
+        ]
+    },
+    {
+        "name": "Virus",
+        "kind": "Event",
+        "tags": [
+            "Microbe",
+            "Event"
+        ],
+        "cost": {
+            "Megacredits": 1
+        },
+        "immediate_impacts": [
+            {
+                "OneOf": [
+                    {
+                        "DestroyAnyCardResource": [
+                            "Animal",
+                            2
+                        ]
+                    },
+                    {
+                        "DestroyAnyResource": [
+                            "Plants",
+                            5
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Sabotage",
+        "kind": "Event",
+        "tags": [
+            "Event"
+        ],
+        "cost": {
+            "Megacredits": 1
+        },
+        "immediate_impacts": [
+            {
+                "OneOf": [
+                    {
+                        "DestroyAnyResource": [
+                            "Titanium",
+                            3
+                        ]
+                    },
+                    {
+                        "DestroyAnyResource": [
+                            "Steel",
+                            4
+                        ]
+                    },
+                    {
+                        "DestroyAnyResource": [
+                            "Megacredits",
+                            7
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Olympus Conference",
+        "kind": "Automatic",
+        "tags": [
+            "Science",
+            "Earth",
+            "Building"
+        ],
+        "cost": {
+            "Building": 10
+        },
+        "points": {
+            "Immediate": 1
+        },
+        "effects": [
+            {
+                "OnOwnTagPlayed": [
+                    "Science",
+                    {
+                        "OneOf": [
+                            {
+                                "AddResourceToSameCard": [
+                                    "Science",
+                                    1
+                                ]
+                            },
+                            {
+                                "SpendResourceFromSameCard": [
+                                    "Science",
+                                    1,
+                                    {
+                                        "DrawCard": 1
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Mars University",
+        "kind": "Automatic",
+        "tags": [
+            "Science",
+            "Building"
+        ],
+        "cost": {
+            "Building": 8
+        },
+        "points": {
+            "Immediate": 1
+        },
+        "effects": [
+            {
+                "OnOwnTagPlayed": [
+                    "Science",
+                    {
+                        "Chained": [
+                            {
+                                "DiscardCard": 1
+                            },
+                            {
+                                "DrawCard": 1
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Land Claim",
+        "kind": "Event",
+        "tags": [
+            "Event"
+        ],
+        "cost": {
+            "Megacredits": 1
+        },
+        "immediate_impacts": [
+            {
+                "PlaceSpecialTile": [
+                    "LandClaim",
+                    [
+                        "LandTile"
+                    ]
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Power Infrastructure",
+        "kind": "Active",
+        "tags": [
+            "Power",
+            "Building"
+        ],
+        "cost": {
+            "Building": 4
+        },
+        "actions": [
+            {
+                "CauseFreeImpact": {
+                    "TransformResource": [
+                        "Energy",
+                        "Megacredits"
+                    ]
+                }
             }
         ]
     }

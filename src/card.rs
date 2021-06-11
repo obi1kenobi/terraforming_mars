@@ -78,6 +78,7 @@ pub enum ImmediateImpact {
     PlaceFloodingOcean(Resource, usize, Vec<LocationRestriction>),
 
     DrawCard(usize),
+    DiscardCard(usize),
 
     // unbought / un-taken cards are always discarded
     LookAndBuyFromDeck(usize), // look at N cards, buy any of them at the standard purchase price
@@ -96,7 +97,12 @@ pub enum ImmediateImpact {
     // "add 1 resource to a card with at least 1 resource on it"
     AddResourceToAnyCardWithExistingResource(usize, usize),
 
+    // spend a card resource from the card that caused this impact in order to cause another impact;
+    // example: "remove a science resource from this card to draw a card"
+    SpendResourceFromSameCard(CardResource, usize, Box<ImmediateImpact>),
+
     GainResource(Resource, usize),
+    SpendResource(Resource, usize),
     GainResourcePerCity(Resource, usize),
     GainResourcePerCityOnMars(Resource, usize),
     ChangeProduction(Resource, isize),
@@ -124,7 +130,6 @@ pub enum ImmediateImpact {
     TransformProduction(Resource, Resource),
 
     // all steal and destroy *up to* that amount
-    DestroyOwnResource(Resource, usize),
     DestroyAnyResource(Resource, usize),
     DestroyAnyCardResource(CardResource, usize),
     StealResource(Resource, usize), // steal from any player, give to yourself
@@ -156,6 +161,9 @@ pub enum LocationRestriction {
     NextToAtLeastTwoCities,
     NextToAGreenery,
     OnSteelOrTitaniumPlacementBonus,
+
+    // tiles cannot be placed at SpecialLocation sites other than VolcanicArea unless they
+    // specifically have the AtSpecialLocation restriction for that area
     AtSpecialLocation(SpecialLocation),
 }
 
@@ -204,6 +212,9 @@ pub enum SpecialTile {
     EcologicalZone,     // placed adjacent to any greenery tile
     MiningRights,       // placed on steel/titanium placement bonus
     MiningArea,         // placed on steel/titanium placement bonus, adjacent to owned tile
+
+    // TODO: make land claim not be a tile -- it's a marker cube placed on the map,
+    //       and therefore doesn't count for greenery adjacency, for the landlord award, etc.
     LandClaim,          // placed anywhere, may be replaced with any tile of the placing player,
                         // does not count for purposes of tile ownership
 }

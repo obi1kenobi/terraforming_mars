@@ -1115,7 +1115,7 @@
         ],
         "immediate_impacts": [
             {
-                "DestroyOwnResource": [
+                "SpendResource": [
                     "Plants",
                     2
                 ]
@@ -1176,7 +1176,7 @@
         ],
         "immediate_impacts": [
             {
-                "DestroyOwnResource": [
+                "SpendResource": [
                     "Plants",
                     1
                 ]
@@ -3388,6 +3388,163 @@
                         "ReservedForOcean"
                     ]
                 ]
+            }
+        ]
+    },
+    {
+        "name": "Local Heat Trapping",
+        "kind": "Event",
+        "tags": [
+            "Event"
+        ],
+        "cost": {
+            "Megacredits": 1
+        },
+        "immediate_impacts": [
+            {
+                "Chained": [
+                    {
+                        "SpendResource": ["Heat", 5]
+                    },
+                    {
+                        "OneOf": [
+                            {
+                                "GainResource": ["Plants", 4]
+                            },
+                            {
+                                "AddResourceToAnyCard": ["Animal", 2]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Imported Hydrogen",
+        "kind": "Event",
+        "tags": [
+            "Earth",
+            "Space",
+            "Event"
+        ],
+        "cost": {
+            "Space": 16
+        },
+        "immediate_impacts": [
+            {
+                "PlaceOcean": [
+                    "ReservedForOcean"
+                ]
+            },
+            {
+                "OneOf": [
+                    {
+                        "GainResource": ["Plants", 3]
+                    },
+                    {
+                        "AddResourceToAnyCard": ["Microbe", 3]
+                    },
+                    {
+                        "AddResourceToAnyCard": ["Animal", 2]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Large Convoy",
+        "kind": "Event",
+        "tags": [
+            "Earth",
+            "Space",
+            "Event"
+        ],
+        "cost": {
+            "Space": 36
+        },
+        "points": {
+            "Immediate": 2
+        },
+        "immediate_impacts": [
+            {
+                "PlaceOcean": [
+                    "ReservedForOcean"
+                ]
+            },
+            {
+                "DrawCard": 2
+            },
+            {
+                "OneOf": [
+                    {
+                        "GainResource": ["Plants", 5]
+                    },
+                    {
+                        "AddResourceToAnyCard": ["Animal", 4]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Nitrogen-Rich Asteroid",
+        "kind": "Event",
+        "tags": [
+            "Space",
+            "Event"
+        ],
+        "cost": {
+            "Space": 31
+        },
+        "immediate_impacts": [
+            "RaiseTerraformRating",
+            "RaiseTerraformRating",
+            "RaiseTemperature",
+            {
+                "OneOf": [
+                    {
+                        "ChangeProduction": ["Plants", 1]
+                    },
+                    {
+                        "GainProductionIfMinTags": ["Plants", 4, "Plant", 3]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Artificial Photosynthesis",
+        "kind": "Automatic",
+        "tags": [
+            "Science"
+        ],
+        "cost": {
+            "Megacredits": 12
+        },
+        "immediate_impacts": [
+            {
+                "OneOf": [
+                    {
+                        "ChangeProduction": ["Plants", 1]
+                    },
+                    {
+                        "ChangeProduction": ["Energy", 2]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Insulation",
+        "kind": "Automatic",
+        "tags": [],
+        "cost": {
+            "Megacredits": 2
+        },
+        "immediate_impacts": [
+            {
+                "TransformProduction": ["Heat", "Megacredits"]
             }
         ]
     }
